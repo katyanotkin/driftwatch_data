@@ -1,0 +1,100 @@
+etfs:
+  # Broad Market
+  - ticker: SPY
+    name: "SPDR S&P 500 ETF Trust"
+    benchmark: "S&P 500"
+  - ticker: IVV
+    name: "iShares Core S&P 500 ETF"
+    benchmark: "S&P 500"
+  - ticker: VOO
+    name: "Vanguard S&P 500 ETF"
+    benchmark: "S&P 500"
+  - ticker: QQQ
+    name: "Invesco QQQ Trust"
+    benchmark: "NASDAQ-100"
+  - ticker: VTI
+    name: "Vanguard Total Stock Market ETF"
+    benchmark: "CRSP US Total Market"
+  - ticker: IWM
+    name: "iShares Russell 2000 ETF"
+    benchmark: "Russell 2000"
+
+  # Sector ETFs (SPDR)
+  - ticker: XLF
+    name: "Financial Select Sector SPDR"
+    benchmark: "S&P Financial Select Sector"
+  - ticker: XLK
+    name: "Technology Select Sector SPDR"
+    benchmark: "S&P Technology Select Sector"
+  - ticker: XLE
+    name: "Energy Select Sector SPDR"
+    benchmark: "S&P Energy Select Sector"
+  - ticker: XLV
+    name: "Health Care Select Sector SPDR"
+    benchmark: "S&P Health Care Select Sector"
+  - ticker: XLI
+    name: "Industrial Select Sector SPDR"
+    benchmark: "S&P Industrial Select Sector"
+  - ticker: XLY
+    name: "Consumer Discretionary Select Sector SPDR"
+    benchmark: "S&P Consumer Discretionary Select Sector"
+  - ticker: XLP
+    name: "Consumer Staples Select Sector SPDR"
+    benchmark: "S&P Consumer Staples Select Sector"
+  - ticker: XLU
+    name: "Utilities Select Sector SPDR"
+    benchmark: "S&P Utilities Select Sector"
+  - ticker: XLB
+    name: "Materials Select Sector SPDR"
+    benchmark: "S&P Materials Select Sector"
+  - ticker: XLRE
+    name: "Real Estate Select Sector SPDR"
+    benchmark: "S&P Real Estate Select Sector"
+  - ticker: XLC
+    name: "Communication Services Select Sector SPDR"
+    benchmark: "S&P Communication Services Select Sector"
+
+  # International
+  - ticker: EFA
+    name: "iShares MSCI EAFE ETF"
+    benchmark: "MSCI EAFE"
+  - ticker: VEA
+    name: "Vanguard FTSE Developed Markets ETF"
+    benchmark: "FTSE Developed All Cap ex US"
+  - ticker: VWO
+    name: "Vanguard FTSE Emerging Markets ETF"
+    benchmark: "FTSE Emerging Markets All Cap China A Inclusion"
+  - ticker: EEM
+    name: "iShares MSCI Emerging Markets ETF"
+    benchmark: "MSCI Emerging Markets"
+
+  # Fixed Income
+  - ticker: AGG
+    name: "iShares Core U.S. Aggregate Bond ETF"
+    benchmark: "Bloomberg U.S. Aggregate Bond"
+  - ticker: BND
+    name: "Vanguard Total Bond Market ETF"
+    benchmark: "Bloomberg U.S. Aggregate Float Adjusted"
+  - ticker: TLT
+    name: "iShares 20+ Year Treasury Bond ETF"
+    benchmark: "ICE U.S. Treasury 20+ Year Bond"
+  - ticker: LQD
+    name: "iShares iBoxx $ Investment Grade Corporate Bond ETF"
+    benchmark: "Markit iBoxx USD Liquid Investment Grade"
+  - ticker: HYG
+    name: "iShares iBoxx $ High Yield Corporate Bond ETF"
+    benchmark: "Markit iBoxx USD Liquid High Yield"
+
+  # Commodities / Alternatives
+  - ticker: GLD
+    name: "SPDR Gold Shares"
+    benchmark: "Gold Spot Price"
+  - ticker: SLV
+    name: "iShares Silver Trust"
+    benchmark: "Silver Spot Price"
+  - ticker: USO
+    name: "United States Oil Fund"
+    benchmark: "WTI Crude Oil Spot Price"
+  - ticker: DIA
+    name: "SPDR Dow Jones Industrial Average ETF"
+    benchmark: "Dow Jones Industrial Average"

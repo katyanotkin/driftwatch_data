@@ -1,0 +1,16 @@
+gcp:
+  project_id: "driftwatch-492902"
+  # dataset_id is derived automatically as driftwatch_{env} (stage or prod)
+  # override here only if you want a custom name
+  location: "US"
+
+claude:
+  model: "claude-sonnet-4-6"
+  max_tokens: 2048
+  temperature: 0
+
+pipelines:
+  ohlcv_lookback_days: 35       # fetch 35d history to compute avg_volume_30d
+  profile_snapshot_interval_days: 28
+  aum_minimum_usd: 100_000_000  # aum_threshold trigger
+  min_confidence_score: 0.5     # discard Claude events below this
