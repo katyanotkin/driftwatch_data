@@ -120,7 +120,7 @@ def _parse_events(raw_text: str, symbol: str, run_id: str) -> list[EventRow]:
                     event_type=e["event_type"],
                     confidence_score=score,
                     details=details_str,
-                    source="claude_auto",
+                    source="auto",
                     detection_run_id=run_id,
                     notes=e.get("notes"),
                 )

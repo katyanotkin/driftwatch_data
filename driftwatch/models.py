@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import datetime
-import json
 from typing import Any, Literal, Optional
 from uuid import uuid4
 
@@ -19,7 +18,11 @@ EventType = Literal[
     "manager_note",
 ]
 
-Source = Literal["claude_auto", "manual"]
+Source = Literal["llm_auto", "manual"]
+
+
+def utc_now() -> datetime.datetime:
+    return datetime.datetime.now(datetime.timezone.utc)
 
 
 class OHLCVRow(BaseModel):
@@ -32,14 +35,20 @@ class OHLCVRow(BaseModel):
     volume: Optional[int] = None
     avg_volume_30d: Optional[float] = None
     pe_ratio: Optional[float] = None
-    ingested_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
+    adjusted_close: Optional[float] = None
+    ingested_at: datetime.datetime = Field(default_factory=utc_now)
     data_source: str = "yfinance"
 
     def to_bq_dict(self) -> dict[str, Any]:
-        d = self.model_dump()
-        d["trade_date"] = d["trade_date"].isoformat()
-        d["ingested_at"] = d["ingested_at"].isoformat()
-        return d
+        data = self.model_dump()
+        data["trade_date"] = data["trade_date"].isoformat()
+        data["ingested_at"] = data["ingested_at"].isoformat()
+        return data
+
+    def to_csv_dict(self) -> dict[str, Any]:
+        data = self.model_dump(exclude={"ingested_at", "data_source"})
+        data["trade_date"] = data["trade_date"].isoformat()
+        return data
 
 
 class ProfileRow(BaseModel):
@@ -52,14 +61,14 @@ class ProfileRow(BaseModel):
     category: Optional[str] = None
     fund_family: Optional[str] = None
     benchmark: Optional[str] = None
-    ingested_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
+    ingested_at: datetime.datetime = Field(default_factory=utc_now)
     data_source: str = "yfinance"
 
     def to_bq_dict(self) -> dict[str, Any]:
-        d = self.model_dump()
-        d["snapshot_date"] = d["snapshot_date"].isoformat()
-        d["ingested_at"] = d["ingested_at"].isoformat()
-        return d
+        data = self.model_dump()
+        data["snapshot_date"] = data["snapshot_date"].isoformat()
+        data["ingested_at"] = data["ingested_at"].isoformat()
+        return data
 
 
 class EventRow(BaseModel):
@@ -68,17 +77,17 @@ class EventRow(BaseModel):
     event_date: datetime.date
     event_type: EventType
     confidence_score: Optional[float] = None
-    details: Optional[str] = None  # JSON string
-    source: Source = "claude_auto"
-    detection_run_id: str = ""
-    detected_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
+    details: Optional[str] = None
+    source: Source = ""
+    detection_run_id: str
+    detected_at: datetime.datetime = Field(default_factory=utc_now)
     notes: Optional[str] = None
 
     def to_bq_dict(self) -> dict[str, Any]:
-        d = self.model_dump()
-        d["event_date"] = d["event_date"].isoformat()
-        d["detected_at"] = d["detected_at"].isoformat()
-        return d
+        data = self.model_dump()
+        data["event_date"] = data["event_date"].isoformat()
+        data["detected_at"] = data["detected_at"].isoformat()
+        return data
 
 
 class PipelineResult(BaseModel):

@@ -1,5 +1,5 @@
-PYTHON  := .venv./bin/python
-PIP     := .venv./bin/pip
+PYTHON  := .venv/bin/python
+PIP     := .venv/bin/pip
 PROJECT ?= $(shell grep GCP_PROJECT_DW .env 2>/dev/null | cut -d= -f2 | tr -d ' ')
 REGION  ?= us-central1
 ENV     ?= prod
@@ -16,6 +16,7 @@ SA          := driftwatch-sa@$(PROJECT).iam.gserviceaccount.com
         docker-build docker-push \
         deploy-daily deploy-profile \
         scheduler-daily scheduler-profile \
+	backfill-local \
         deploy-all
 
 help:
@@ -56,6 +57,7 @@ help:
 	@echo "    make run-daily ENV=stage"
 	@echo "    make deploy-all ENV=prod"
 	@echo "    make add-note SYMBOL=SPY NOTE='rebalancing soon' ENV=prod"
+	@echo "    backfill-local      Collect Backfill OHLCV data locally  (START_DATE=, END_DATE=)"
 	@echo ""
 
 # ---------------------------------------------------------------------------
@@ -66,7 +68,7 @@ install:
 	$(PIP) install -r requirements.txt
 
 lint:
-	$(PYTHON) -m ruff check driftwatch/ jobs/
+	$(PYTHON) -m ruff check driftwatch/ jobs/ tests/
 
 test:
 	$(PYTHON) -m pytest tests/ -v
@@ -85,6 +87,14 @@ run-profile:
 add-note:
 	PYTHONPATH=. DW_ENV=$(ENV) GCP_PROJECT=$(PROJECT) \
 	  $(PYTHON) jobs/add_note.py $(SYMBOL) "$(NOTE)" $(if $(DATE),--date $(DATE),)
+
+# Usage: make backfill-local
+# Or:    make backfill-local START_DATE=2026-03-01 END_DATE=2026-04-09
+backfill-local:
+	PYTHONPATH=. \
+	  $(if $(START_DATE),START_DATE=$(START_DATE),) \
+	  $(if $(END_DATE),END_DATE=$(END_DATE),) \
+	  $(PYTHON) jobs/backfill.py
 
 # ---------------------------------------------------------------------------
 # GCP setup (one-time per project)

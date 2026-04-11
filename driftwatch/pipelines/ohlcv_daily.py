@@ -11,7 +11,7 @@ from driftwatch.yf_client import fetch_all_ohlcv
 log = logging.getLogger(__name__)
 
 
-def run(run_date: datetime.date, run_id: str) -> PipelineResult:
+def run(run_date: datetime.date) -> PipelineResult:
     symbols = load_tickers()
     log.info("Fetching OHLCV for %d symbols on %s", len(symbols), run_date)
 
@@ -23,5 +23,5 @@ def run(run_date: datetime.date, run_id: str) -> PipelineResult:
         errors.append(f"{sym}: no OHLCV data for {run_date}")
         log.warning("%s: no OHLCV data returned", sym)
 
-    written = bq_client.upsert_ohlcv(rows, run_id)
+    written = bq_client.replace_ohlcv_rows(rows)
     return PipelineResult(rows_written=written, errors=errors)

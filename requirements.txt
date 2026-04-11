@@ -3,3 +3,5 @@ google-cloud-bigquery
 anthropic
 pydantic-settings
 pyyaml
+ruff
+pytest

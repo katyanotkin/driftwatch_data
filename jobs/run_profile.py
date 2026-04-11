@@ -20,6 +20,10 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from driftwatch.pipelines import event_detection, profile_snapshot
+from driftwatch.bq_client import BQClient
+
+client = BQClient()
+client.ensure_tables()
 
 
 def main() -> int:
@@ -31,7 +35,7 @@ def main() -> int:
         log.info("=== Profile run skipped (4-week gate) ===")
         return 0
 
-    profile_result = profile_snapshot.run(run_date, run_id)
+    profile_result = profile_snapshot.run(run_date)
     log.info(
         "Profile: %d rows written, %d errors",
         profile_result.rows_written,

@@ -27,7 +27,7 @@ def should_run(today: datetime.date) -> bool:
     return True
 
 
-def run(run_date: datetime.date, run_id: str) -> PipelineResult:
+def run(run_date: datetime.date) -> PipelineResult:
     symbols = load_tickers()
     log.info("Fetching profile snapshots for %d symbols on %s", len(symbols), run_date)
 
@@ -39,5 +39,5 @@ def run(run_date: datetime.date, run_id: str) -> PipelineResult:
         errors.append(f"{sym}: no profile data for {run_date}")
         log.warning("%s: no profile data returned", sym)
 
-    written = bq_client.upsert_profile(rows, run_id)
+    written = bq_client.replace_profile_rows(rows)
     return PipelineResult(rows_written=written, errors=errors)

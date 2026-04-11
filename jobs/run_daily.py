@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import datetime
 import logging
+import os
 import sys
 import uuid
 
@@ -13,23 +14,34 @@ logging.basicConfig(
 )
 log = logging.getLogger("driftwatch.daily")
 
-# Ensure repo root is on path when run directly
-import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from driftwatch.bq_client import BQClient
 from driftwatch.pipelines import event_detection, ohlcv_daily
 
 
 def main() -> int:
+    client = BQClient()
+    client.ensure_tables()
+
     run_date = datetime.date.today()
     run_id = str(uuid.uuid4())
+
     log.info("=== Daily run started | run_id=%s | date=%s ===", run_id, run_date)
 
-    ohlcv_result = ohlcv_daily.run(run_date, run_id)
-    log.info("OHLCV: %d rows written, %d errors", ohlcv_result.rows_written, len(ohlcv_result.errors))
+    ohlcv_result = ohlcv_daily.run(run_date)
+    log.info(
+        "OHLCV: %d rows written, %d errors",
+        ohlcv_result.rows_written,
+        len(ohlcv_result.errors),
+    )
 
-    events = event_detection.run_ohlcv_detection(run_date, run_id)
-    log.info("Events detected: %d", len(events))
+    try:
+        events = event_detection.run_ohlcv_detection(run_date, run_id)
+        log.info("Events detected: %d", len(events))
+    except Exception:
+        log.exception("Event detection failed")
+        return 1 if ohlcv_result.has_critical_errors else 0
 
     log.info("=== Daily run complete ===")
     return 1 if ohlcv_result.has_critical_errors else 0
