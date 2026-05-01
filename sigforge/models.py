@@ -42,9 +42,13 @@ class RawBar(BaseModel):
     open: Optional[float] = None
     high: Optional[float] = None
     low: Optional[float] = None
-    close: Optional[float] = None
+    # Split-and-dividend adjusted close (yfinance auto_adjust=True)
+    adj_close: Optional[float] = None
     volume: Optional[int] = None
     avg_volume_30d: Optional[float] = None
+    # Corporate actions — non-None only on the event date
+    dividends: Optional[float] = None   # raw dividend per share on ex-date
+    split_ratio: Optional[float] = None  # e.g. 2.0 for a 2-for-1 split
     data_source: str = "yfinance"
     ingested_at: datetime.datetime = Field(default_factory=utc_now)
 
@@ -81,8 +85,21 @@ class ProfileRow(BaseModel):
     fifty_two_week_low: Optional[float] = None
     beta: Optional[float] = None
     shares_outstanding: Optional[float] = None
+    float_shares: Optional[float] = None          # tradeable float (excl. locked-up shares)
     shares_short: Optional[float] = None
-    short_ratio: Optional[float] = None
+    short_ratio: Optional[float] = None           # days-to-cover
+    short_pct_float: Optional[float] = None       # short interest as % of float
+    institutional_hold_pct: Optional[float] = None
+    insider_hold_pct: Optional[float] = None
+    gross_margin: Optional[float] = None
+    operating_margin: Optional[float] = None
+    profit_margin: Optional[float] = None
+    return_on_equity: Optional[float] = None
+    return_on_assets: Optional[float] = None
+    debt_to_equity: Optional[float] = None
+    revenue_growth: Optional[float] = None        # quarterly YoY
+    earnings_growth: Optional[float] = None       # quarterly YoY
+    free_cash_flow: Optional[float] = None        # trailing 12-month
     analyst_target_price: Optional[float] = None
     analyst_recommendation: Optional[str] = None
     data_source: str = "yfinance"
@@ -125,9 +142,19 @@ class FeatureRow(BaseModel):
 
     # Fundamental (fu_)
     fu_pe_ratio: Optional[float] = None
+    fu_short_interest_ratio: Optional[float] = None   # days-to-cover
+    fu_short_pct_float: Optional[float] = None        # short interest as % of float
+    fu_float_turnover: Optional[float] = None         # daily volume / float shares
+    fu_gross_margin: Optional[float] = None
+    fu_operating_margin: Optional[float] = None
+    fu_profit_margin: Optional[float] = None
+    fu_return_on_equity: Optional[float] = None
+    fu_return_on_assets: Optional[float] = None
+    fu_debt_to_equity: Optional[float] = None
+    fu_revenue_growth: Optional[float] = None
+    fu_earnings_growth: Optional[float] = None
     fu_earnings_revision_momentum: Optional[float] = None  # stub: TODO
     fu_analyst_estimate_dispersion: Optional[float] = None  # stub: TODO
-    fu_short_interest_ratio: Optional[float] = None
 
     def to_bq_dict(self) -> dict[str, Any]:
         data = self.model_dump()

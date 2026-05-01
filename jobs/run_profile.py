@@ -90,7 +90,7 @@ def main() -> int:
                 )
 
     if events:
-        bq.upsert_events(events)
+        bq.insert_events(events)
         log.info("Events: %d gics_reclassification events written", len(events))
 
     clear_cache()

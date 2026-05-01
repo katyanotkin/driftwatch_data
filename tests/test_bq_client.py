@@ -33,8 +33,8 @@ class TestUpsertDaily:
         bq.insert_rows_json.return_value = []
 
         rows = [
-            RawBar(symbol="AAPL", trade_date=datetime.date(2025, 4, 1), close=170.0),
-            RawBar(symbol="MSFT", trade_date=datetime.date(2025, 4, 1), close=400.0),
+            RawBar(symbol="AAPL", trade_date=datetime.date(2025, 4, 1), adj_close=170.0),
+            RawBar(symbol="MSFT", trade_date=datetime.date(2025, 4, 1), adj_close=400.0),
         ]
         n = client.upsert_daily(rows)
         assert n == 2
@@ -77,23 +77,22 @@ class TestUpsertFeatures:
         assert client.upsert_features([]) == 0
 
 
-class TestUpsertEvents:
-    def test_skips_existing_event_ids(self, mock_bq_client):
+class TestInsertEvents:
+    def test_inserts_event(self, mock_bq_client):
         client, bq = mock_bq_client
-        existing_id = "existing-uuid"
-        bq.query.return_value.result.return_value = [{"event_id": existing_id}]
         bq.insert_rows_json.return_value = []
 
-        existing = EventRow(
-            event_id=existing_id,
+        event = EventRow(
+            event_id="existing-uuid",
             symbol="AAPL",
             event_date=datetime.date(2025, 4, 1),
             event_type="dividend",
             source="claude_auto",
             detection_run_id="r",
         )
-        n = client.upsert_events([existing])
-        assert n == 0
+        n = client.insert_events([event])
+        assert n == 1
+        assert bq.insert_rows_json.called
 
     def test_inserts_new_events(self, mock_bq_client):
         client, bq = mock_bq_client
@@ -107,12 +106,12 @@ class TestUpsertEvents:
             source="claude_auto",
             detection_run_id="r",
         )
-        n = client.upsert_events([event])
+        n = client.insert_events([event])
         assert n == 1
 
     def test_empty_list_returns_zero(self, mock_bq_client):
         client, _ = mock_bq_client
-        assert client.upsert_events([]) == 0
+        assert client.insert_events([]) == 0
 
     def test_raises_on_bq_error(self, mock_bq_client):
         client, bq = mock_bq_client
@@ -129,28 +128,24 @@ class TestUpsertEvents:
         with pytest.raises(RuntimeError, match="BQ insert errors"):
             client.insert_events_manual([event])
 
-    def test_add_note_idempotent(self, mock_bq_client):
-        """upsert_events with the same event_id twice must insert exactly once."""
+    def test_add_note_same_id_inserts_twice(self, mock_bq_client):
+        """insert_events appends — calling twice with the same event produces two rows."""
         client, bq = mock_bq_client
-        event_id = "fixed-id"
-        # First call: no existing rows
         bq.query.return_value.result.return_value = []
         bq.insert_rows_json.return_value = []
         event = EventRow(
-            event_id=event_id,
+            event_id="fixed-id",
             symbol="AAPL",
             event_date=datetime.date(2025, 4, 1),
             event_type="manager_note",
             source="manual",
             detection_run_id="manual",
         )
-        n1 = client.upsert_events([event])
+        n1 = client.insert_events([event])
         assert n1 == 1
 
-        # Second call: event_id already present
-        bq.query.return_value.result.return_value = [{"event_id": event_id}]
-        n2 = client.upsert_events([event])
-        assert n2 == 0
+        n2 = client.insert_events([event])
+        assert n2 == 1
 
 
 class TestGetPreviousProfile:

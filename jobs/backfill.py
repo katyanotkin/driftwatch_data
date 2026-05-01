@@ -99,15 +99,19 @@ def main() -> int:
             row_s = df.loc[trade_date]
             past = df[df.index <= trade_date].tail(30)
             avg_vol = float(past["Volume"].mean()) if len(past) > 0 else None
+            div = _sf(row_s.get("Dividends"))
+            split = _sf(row_s.get("Stock Splits"))
             day_daily.append(RawBar(
                 symbol=sym,
                 trade_date=trade_date,
                 open=_sf(row_s.get("Open")),
                 high=_sf(row_s.get("High")),
                 low=_sf(row_s.get("Low")),
-                close=_sf(row_s.get("Close")),
+                adj_close=_sf(row_s.get("Close")),
                 volume=_si(row_s.get("Volume")),
                 avg_volume_30d=avg_vol,
+                dividends=div if div else None,
+                split_ratio=split if split else None,
             ))
 
         day_features, feat_result = feat_pipeline.run(

@@ -228,29 +228,8 @@ class BQClient:
     # Upsert: ticker_events
     # ------------------------------------------------------------------
 
-    def upsert_events(self, rows: list[EventRow]) -> int:
-        """Upsert by event_id: skip events whose ID already exists."""
-        if not rows:
-            return 0
-
-        existing_ids = self._get_existing_event_ids({r.event_id for r in rows})
-        new_rows = [r for r in rows if r.event_id not in existing_ids]
-
-        if not new_rows:
-            log.info("All %d events already exist — skipping", len(rows))
-            return 0
-
-        errors = self._client.insert_rows_json(
-            self._table(EVENTS_TABLE),
-            [r.to_bq_dict() for r in new_rows],
-        )
-        if errors:
-            raise RuntimeError(f"BQ insert errors ticker_events: {errors}")
-        log.info("Inserted %d ticker_events rows", len(new_rows))
-        return len(new_rows)
-
-    def insert_events_manual(self, rows: list[EventRow]) -> int:
-        """Insert manual events without dedup."""
+    def insert_events(self, rows: list[EventRow]) -> int:
+        """Append events. No dedup — duplicates are acceptable; deduplicate at query time."""
         if not rows:
             return 0
         errors = self._client.insert_rows_json(
@@ -258,22 +237,12 @@ class BQClient:
             [r.to_bq_dict() for r in rows],
         )
         if errors:
-            raise RuntimeError(f"BQ insert errors (manual events): {errors}")
-        log.info("Inserted %d manual events", len(rows))
+            raise RuntimeError(f"BQ insert errors ticker_events: {errors}")
+        log.info("Inserted %d ticker_events rows", len(rows))
         return len(rows)
 
-    def _get_existing_event_ids(self, ids: set[str]) -> set[str]:
-        if not ids:
-            return set()
-        sql = f"""
-        SELECT event_id
-        FROM {self._sql_ref(EVENTS_TABLE)}
-        WHERE event_id IN UNNEST(@ids)
-        """
-        cfg = bigquery.QueryJobConfig(
-            query_parameters=[bigquery.ArrayQueryParameter("ids", "STRING", list(ids))]
-        )
-        return {row["event_id"] for row in self._client.query(sql, job_config=cfg).result()}
+    def insert_events_manual(self, rows: list[EventRow]) -> int:
+        return self.insert_events(rows)
 
     # ------------------------------------------------------------------
     # Internal helpers

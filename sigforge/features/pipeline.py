@@ -92,7 +92,7 @@ def run(
             module_errors.append(err)
 
         info = info_dict.get(symbol, {})
-        out, err = _run_module("fundamental", symbol, fundamental.compute, info)
+        out, err = _run_module("fundamental", symbol, fundamental.compute, info, bars)
         features.update(out)
         if err:
             module_errors.append(err)

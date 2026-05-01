@@ -23,8 +23,10 @@ def get_history(
     end_date: Optional[datetime.date] = None,
 ) -> pd.DataFrame:
     """
-    Return up to lookback_days of daily OHLCV history for symbol, cached.
-    DataFrame is indexed by datetime.date, columns: Open High Low Close Volume.
+    Return up to lookback_days of daily adjusted OHLCV history for symbol, cached.
+    DataFrame is indexed by datetime.date.
+    Columns: Open High Low Close Volume Dividends Stock Splits (auto_adjust=True).
+    Close is the split-and-dividend-adjusted price.
     """
     if symbol in _history_cache:
         return _history_cache[symbol]
@@ -38,6 +40,7 @@ def get_history(
             start=start.isoformat(),
             end=(end + datetime.timedelta(days=1)).isoformat(),
             auto_adjust=True,
+            actions=True,
         )
         if df.empty:
             log.warning("%s: empty history", symbol)
@@ -96,6 +99,7 @@ def fetch_daily_batch(
             start=start.isoformat(),
             end=end.isoformat(),
             auto_adjust=True,
+            actions=True,
             group_by="ticker",
             threads=True,
             progress=False,
@@ -126,6 +130,9 @@ def fetch_daily_batch(
             past = sym_df[sym_df.index <= trade_date].tail(30)
             avg_vol = float(past["Volume"].mean()) if len(past) > 0 else None
 
+            # Dividends/splits are sparse — store None rather than 0
+            div = _safe_float(today.get("Dividends"))
+            split = _safe_float(today.get("Stock Splits"))
             rows.append(
                 RawBar(
                     symbol=symbol,
@@ -133,9 +140,11 @@ def fetch_daily_batch(
                     open=_safe_float(today.get("Open")),
                     high=_safe_float(today.get("High")),
                     low=_safe_float(today.get("Low")),
-                    close=_safe_float(today.get("Close")),
+                    adj_close=_safe_float(today.get("Close")),
                     volume=_safe_int(today.get("Volume")),
                     avg_volume_30d=avg_vol,
+                    dividends=div if div else None,
+                    split_ratio=split if split else None,
                 )
             )
         except Exception as exc:
@@ -171,8 +180,21 @@ def fetch_profile(symbol: str, snapshot_date: datetime.date) -> Optional[Profile
             fifty_two_week_low=_safe_float(info.get("fiftyTwoWeekLow")),
             beta=_safe_float(info.get("beta")),
             shares_outstanding=_safe_float(info.get("sharesOutstanding")),
+            float_shares=_safe_float(info.get("floatShares")),
             shares_short=_safe_float(info.get("sharesShort")),
             short_ratio=_safe_float(info.get("shortRatio")),
+            short_pct_float=_safe_float(info.get("shortPercentOfFloat")),
+            institutional_hold_pct=_safe_float(info.get("heldPercentInstitutions")),
+            insider_hold_pct=_safe_float(info.get("heldPercentInsiders")),
+            gross_margin=_safe_float(info.get("grossMargins")),
+            operating_margin=_safe_float(info.get("operatingMargins")),
+            profit_margin=_safe_float(info.get("profitMargins")),
+            return_on_equity=_safe_float(info.get("returnOnEquity")),
+            return_on_assets=_safe_float(info.get("returnOnAssets")),
+            debt_to_equity=_safe_float(info.get("debtToEquity")),
+            revenue_growth=_safe_float(info.get("revenueGrowth")),
+            earnings_growth=_safe_float(info.get("earningsGrowth")),
+            free_cash_flow=_safe_float(info.get("freeCashflow")),
             analyst_target_price=_safe_float(info.get("targetMeanPrice")),
             analyst_recommendation=info.get("recommendationKey"),
         )

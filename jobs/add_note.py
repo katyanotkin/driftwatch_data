@@ -65,7 +65,7 @@ def main() -> int:
 
     bq = BQClient()
     bq.ensure_tables()
-    written = bq.upsert_events([event])
+    written = bq.insert_events([event])
 
     if written:
         log.info(
