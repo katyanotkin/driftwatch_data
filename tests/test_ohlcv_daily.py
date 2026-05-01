@@ -1,5 +1,6 @@
 import datetime
 from unittest.mock import patch
+
 from driftwatch.models import OHLCVRow
 from driftwatch.pipelines import ohlcv_daily
 

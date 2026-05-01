@@ -1,8 +1,9 @@
 import datetime
 from unittest.mock import patch
-import pandas as pd
-from driftwatch.yf_client import fetch_ohlcv
 
+import pandas as pd
+
+from driftwatch.yf_client import fetch_ohlcv
 
 TRADE_DATE = datetime.date(2026, 3, 10)
 

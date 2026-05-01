@@ -7,3 +7,4 @@ pyyaml
 anthropic
 ruff
 pytest
+pre-commit
