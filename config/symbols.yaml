@@ -1,100 +1,431 @@
-etfs:
-  # Broad Market
-  - ticker: SPY
-    name: "SPDR S&P 500 ETF Trust"
-    benchmark: "S&P 500"
-  - ticker: IVV
-    name: "iShares Core S&P 500 ETF"
-    benchmark: "S&P 500"
-  - ticker: VOO
-    name: "Vanguard S&P 500 ETF"
-    benchmark: "S&P 500"
-  - ticker: QQQ
-    name: "Invesco QQQ Trust"
-    benchmark: "NASDAQ-100"
-  - ticker: VTI
-    name: "Vanguard Total Stock Market ETF"
-    benchmark: "CRSP US Total Market"
-  - ticker: IWM
-    name: "iShares Russell 2000 ETF"
-    benchmark: "Russell 2000"
+stocks:
+  # ── Information Technology ──────────────────────────────────────────────────
+  - ticker: AAPL
+    name: "Apple Inc."
+    gics_sector: "Information Technology"
+    gics_industry_group: "Technology Hardware & Equipment"
+    gics_industry: "Technology Hardware, Storage & Peripherals"
+    gics_sub_industry: "Technology Hardware, Storage & Peripherals"
 
-  # Sector ETFs (SPDR)
-  - ticker: XLF
-    name: "Financial Select Sector SPDR"
-    benchmark: "S&P Financial Select Sector"
-  - ticker: XLK
-    name: "Technology Select Sector SPDR"
-    benchmark: "S&P Technology Select Sector"
-  - ticker: XLE
-    name: "Energy Select Sector SPDR"
-    benchmark: "S&P Energy Select Sector"
-  - ticker: XLV
-    name: "Health Care Select Sector SPDR"
-    benchmark: "S&P Health Care Select Sector"
-  - ticker: XLI
-    name: "Industrial Select Sector SPDR"
-    benchmark: "S&P Industrial Select Sector"
-  - ticker: XLY
-    name: "Consumer Discretionary Select Sector SPDR"
-    benchmark: "S&P Consumer Discretionary Select Sector"
-  - ticker: XLP
-    name: "Consumer Staples Select Sector SPDR"
-    benchmark: "S&P Consumer Staples Select Sector"
-  - ticker: XLU
-    name: "Utilities Select Sector SPDR"
-    benchmark: "S&P Utilities Select Sector"
-  - ticker: XLB
-    name: "Materials Select Sector SPDR"
-    benchmark: "S&P Materials Select Sector"
-  - ticker: XLRE
-    name: "Real Estate Select Sector SPDR"
-    benchmark: "S&P Real Estate Select Sector"
-  - ticker: XLC
-    name: "Communication Services Select Sector SPDR"
-    benchmark: "S&P Communication Services Select Sector"
+  - ticker: MSFT
+    name: "Microsoft Corporation"
+    gics_sector: "Information Technology"
+    gics_industry_group: "Software & Services"
+    gics_industry: "Systems Software"
+    gics_sub_industry: "Systems Software"
 
-  # International
-  - ticker: EFA
-    name: "iShares MSCI EAFE ETF"
-    benchmark: "MSCI EAFE"
-  - ticker: VEA
-    name: "Vanguard FTSE Developed Markets ETF"
-    benchmark: "FTSE Developed All Cap ex US"
-  - ticker: VWO
-    name: "Vanguard FTSE Emerging Markets ETF"
-    benchmark: "FTSE Emerging Markets All Cap China A Inclusion"
-  - ticker: EEM
-    name: "iShares MSCI Emerging Markets ETF"
-    benchmark: "MSCI Emerging Markets"
+  - ticker: NVDA
+    name: "NVIDIA Corporation"
+    gics_sector: "Information Technology"
+    gics_industry_group: "Semiconductors & Semiconductor Equipment"
+    gics_industry: "Semiconductors"
+    gics_sub_industry: "Semiconductors"
 
-  # Fixed Income
-  - ticker: AGG
-    name: "iShares Core U.S. Aggregate Bond ETF"
-    benchmark: "Bloomberg U.S. Aggregate Bond"
-  - ticker: BND
-    name: "Vanguard Total Bond Market ETF"
-    benchmark: "Bloomberg U.S. Aggregate Float Adjusted"
-  - ticker: TLT
-    name: "iShares 20+ Year Treasury Bond ETF"
-    benchmark: "ICE U.S. Treasury 20+ Year Bond"
-  - ticker: LQD
-    name: "iShares iBoxx $ Investment Grade Corporate Bond ETF"
-    benchmark: "Markit iBoxx USD Liquid Investment Grade"
-  - ticker: HYG
-    name: "iShares iBoxx $ High Yield Corporate Bond ETF"
-    benchmark: "Markit iBoxx USD Liquid High Yield"
+  - ticker: AVGO
+    name: "Broadcom Inc."
+    gics_sector: "Information Technology"
+    gics_industry_group: "Semiconductors & Semiconductor Equipment"
+    gics_industry: "Semiconductors"
+    gics_sub_industry: "Semiconductors"
 
-  # Commodities / Alternatives
-  - ticker: GLD
-    name: "SPDR Gold Shares"
-    benchmark: "Gold Spot Price"
-  - ticker: SLV
-    name: "iShares Silver Trust"
-    benchmark: "Silver Spot Price"
-  - ticker: USO
-    name: "United States Oil Fund"
-    benchmark: "WTI Crude Oil Spot Price"
-  - ticker: DIA
-    name: "SPDR Dow Jones Industrial Average ETF"
-    benchmark: "Dow Jones Industrial Average"
+  - ticker: ORCL
+    name: "Oracle Corporation"
+    gics_sector: "Information Technology"
+    gics_industry_group: "Software & Services"
+    gics_industry: "Application Software"
+    gics_sub_industry: "Application Software"
+
+  - ticker: CRM
+    name: "Salesforce Inc."
+    gics_sector: "Information Technology"
+    gics_industry_group: "Software & Services"
+    gics_industry: "Application Software"
+    gics_sub_industry: "Application Software"
+
+  - ticker: ADBE
+    name: "Adobe Inc."
+    gics_sector: "Information Technology"
+    gics_industry_group: "Software & Services"
+    gics_industry: "Application Software"
+    gics_sub_industry: "Application Software"
+
+  - ticker: AMD
+    name: "Advanced Micro Devices Inc."
+    gics_sector: "Information Technology"
+    gics_industry_group: "Semiconductors & Semiconductor Equipment"
+    gics_industry: "Semiconductors"
+    gics_sub_industry: "Semiconductors"
+
+  - ticker: INTC
+    name: "Intel Corporation"
+    gics_sector: "Information Technology"
+    gics_industry_group: "Semiconductors & Semiconductor Equipment"
+    gics_industry: "Semiconductors"
+    gics_sub_industry: "Semiconductors"
+
+  - ticker: QCOM
+    name: "QUALCOMM Incorporated"
+    gics_sector: "Information Technology"
+    gics_industry_group: "Semiconductors & Semiconductor Equipment"
+    gics_industry: "Semiconductors"
+    gics_sub_industry: "Semiconductors"
+
+  - ticker: ACN
+    name: "Accenture plc"
+    gics_sector: "Information Technology"
+    gics_industry_group: "Software & Services"
+    gics_industry: "IT Consulting & Other Services"
+    gics_sub_industry: "IT Consulting & Other Services"
+
+  - ticker: IBM
+    name: "International Business Machines Corp."
+    gics_sector: "Information Technology"
+    gics_industry_group: "Software & Services"
+    gics_industry: "IT Consulting & Other Services"
+    gics_sub_industry: "IT Consulting & Other Services"
+
+  # ── Communication Services ──────────────────────────────────────────────────
+  - ticker: GOOGL
+    name: "Alphabet Inc. Class A"
+    gics_sector: "Communication Services"
+    gics_industry_group: "Media & Entertainment"
+    gics_industry: "Interactive Media & Services"
+    gics_sub_industry: "Interactive Media & Services"
+
+  - ticker: META
+    name: "Meta Platforms Inc."
+    gics_sector: "Communication Services"
+    gics_industry_group: "Media & Entertainment"
+    gics_industry: "Interactive Media & Services"
+    gics_sub_industry: "Interactive Media & Services"
+
+  - ticker: NFLX
+    name: "Netflix Inc."
+    gics_sector: "Communication Services"
+    gics_industry_group: "Media & Entertainment"
+    gics_industry: "Movies & Entertainment"
+    gics_sub_industry: "Movies & Entertainment"
+
+  - ticker: DIS
+    name: "The Walt Disney Company"
+    gics_sector: "Communication Services"
+    gics_industry_group: "Media & Entertainment"
+    gics_industry: "Movies & Entertainment"
+    gics_sub_industry: "Movies & Entertainment"
+
+  - ticker: T
+    name: "AT&T Inc."
+    gics_sector: "Communication Services"
+    gics_industry_group: "Telecommunication Services"
+    gics_industry: "Integrated Telecommunication Services"
+    gics_sub_industry: "Integrated Telecommunication Services"
+
+  - ticker: VZ
+    name: "Verizon Communications Inc."
+    gics_sector: "Communication Services"
+    gics_industry_group: "Telecommunication Services"
+    gics_industry: "Integrated Telecommunication Services"
+    gics_sub_industry: "Integrated Telecommunication Services"
+
+  # ── Financials ──────────────────────────────────────────────────────────────
+  - ticker: JPM
+    name: "JPMorgan Chase & Co."
+    gics_sector: "Financials"
+    gics_industry_group: "Banks"
+    gics_industry: "Diversified Banks"
+    gics_sub_industry: "Diversified Banks"
+
+  - ticker: BAC
+    name: "Bank of America Corporation"
+    gics_sector: "Financials"
+    gics_industry_group: "Banks"
+    gics_industry: "Diversified Banks"
+    gics_sub_industry: "Diversified Banks"
+
+  - ticker: WFC
+    name: "Wells Fargo & Company"
+    gics_sector: "Financials"
+    gics_industry_group: "Banks"
+    gics_industry: "Diversified Banks"
+    gics_sub_industry: "Diversified Banks"
+
+  - ticker: GS
+    name: "The Goldman Sachs Group Inc."
+    gics_sector: "Financials"
+    gics_industry_group: "Diversified Financials"
+    gics_industry: "Investment Banking & Brokerage"
+    gics_sub_industry: "Investment Banking & Brokerage"
+
+  - ticker: MS
+    name: "Morgan Stanley"
+    gics_sector: "Financials"
+    gics_industry_group: "Diversified Financials"
+    gics_industry: "Investment Banking & Brokerage"
+    gics_sub_industry: "Investment Banking & Brokerage"
+
+  - ticker: V
+    name: "Visa Inc."
+    gics_sector: "Financials"
+    gics_industry_group: "Diversified Financials"
+    gics_industry: "Transaction & Payment Processing Services"
+    gics_sub_industry: "Transaction & Payment Processing Services"
+
+  - ticker: MA
+    name: "Mastercard Incorporated"
+    gics_sector: "Financials"
+    gics_industry_group: "Diversified Financials"
+    gics_industry: "Transaction & Payment Processing Services"
+    gics_sub_industry: "Transaction & Payment Processing Services"
+
+  - ticker: BRK-B
+    name: "Berkshire Hathaway Inc. Class B"
+    gics_sector: "Financials"
+    gics_industry_group: "Insurance"
+    gics_industry: "Multi-line Insurance"
+    gics_sub_industry: "Multi-line Insurance"
+
+  # ── Health Care ─────────────────────────────────────────────────────────────
+  - ticker: JNJ
+    name: "Johnson & Johnson"
+    gics_sector: "Health Care"
+    gics_industry_group: "Pharmaceuticals, Biotechnology & Life Sciences"
+    gics_industry: "Pharmaceuticals"
+    gics_sub_industry: "Pharmaceuticals"
+
+  - ticker: UNH
+    name: "UnitedHealth Group Incorporated"
+    gics_sector: "Health Care"
+    gics_industry_group: "Health Care Equipment & Services"
+    gics_industry: "Managed Health Care"
+    gics_sub_industry: "Managed Health Care"
+
+  - ticker: PFE
+    name: "Pfizer Inc."
+    gics_sector: "Health Care"
+    gics_industry_group: "Pharmaceuticals, Biotechnology & Life Sciences"
+    gics_industry: "Pharmaceuticals"
+    gics_sub_industry: "Pharmaceuticals"
+
+  - ticker: ABBV
+    name: "AbbVie Inc."
+    gics_sector: "Health Care"
+    gics_industry_group: "Pharmaceuticals, Biotechnology & Life Sciences"
+    gics_industry: "Pharmaceuticals"
+    gics_sub_industry: "Pharmaceuticals"
+
+  - ticker: MRK
+    name: "Merck & Co. Inc."
+    gics_sector: "Health Care"
+    gics_industry_group: "Pharmaceuticals, Biotechnology & Life Sciences"
+    gics_industry: "Pharmaceuticals"
+    gics_sub_industry: "Pharmaceuticals"
+
+  - ticker: LLY
+    name: "Eli Lilly and Company"
+    gics_sector: "Health Care"
+    gics_industry_group: "Pharmaceuticals, Biotechnology & Life Sciences"
+    gics_industry: "Pharmaceuticals"
+    gics_sub_industry: "Pharmaceuticals"
+
+  - ticker: TMO
+    name: "Thermo Fisher Scientific Inc."
+    gics_sector: "Health Care"
+    gics_industry_group: "Pharmaceuticals, Biotechnology & Life Sciences"
+    gics_industry: "Life Sciences Tools & Services"
+    gics_sub_industry: "Life Sciences Tools & Services"
+
+  # ── Consumer Discretionary ──────────────────────────────────────────────────
+  - ticker: AMZN
+    name: "Amazon.com Inc."
+    gics_sector: "Consumer Discretionary"
+    gics_industry_group: "Retailing"
+    gics_industry: "Broadline Retail"
+    gics_sub_industry: "Broadline Retail"
+
+  - ticker: TSLA
+    name: "Tesla Inc."
+    gics_sector: "Consumer Discretionary"
+    gics_industry_group: "Automobiles & Components"
+    gics_industry: "Automobile Manufacturers"
+    gics_sub_industry: "Automobile Manufacturers"
+
+  - ticker: HD
+    name: "The Home Depot Inc."
+    gics_sector: "Consumer Discretionary"
+    gics_industry_group: "Retailing"
+    gics_industry: "Home Improvement Retail"
+    gics_sub_industry: "Home Improvement Retail"
+
+  - ticker: MCD
+    name: "McDonald's Corporation"
+    gics_sector: "Consumer Discretionary"
+    gics_industry_group: "Consumer Services"
+    gics_industry: "Restaurants"
+    gics_sub_industry: "Restaurants"
+
+  - ticker: NKE
+    name: "NIKE Inc."
+    gics_sector: "Consumer Discretionary"
+    gics_industry_group: "Consumer Durables & Apparel"
+    gics_industry: "Apparel, Accessories & Luxury Goods"
+    gics_sub_industry: "Apparel, Accessories & Luxury Goods"
+
+  # ── Consumer Staples ────────────────────────────────────────────────────────
+  - ticker: PG
+    name: "Procter & Gamble Company"
+    gics_sector: "Consumer Staples"
+    gics_industry_group: "Household & Personal Products"
+    gics_industry: "Household Products"
+    gics_sub_industry: "Household Products"
+
+  - ticker: KO
+    name: "The Coca-Cola Company"
+    gics_sector: "Consumer Staples"
+    gics_industry_group: "Food, Beverage & Tobacco"
+    gics_industry: "Soft Drinks & Non-alcoholic Beverages"
+    gics_sub_industry: "Soft Drinks & Non-alcoholic Beverages"
+
+  - ticker: PEP
+    name: "PepsiCo Inc."
+    gics_sector: "Consumer Staples"
+    gics_industry_group: "Food, Beverage & Tobacco"
+    gics_industry: "Soft Drinks & Non-alcoholic Beverages"
+    gics_sub_industry: "Soft Drinks & Non-alcoholic Beverages"
+
+  - ticker: WMT
+    name: "Walmart Inc."
+    gics_sector: "Consumer Staples"
+    gics_industry_group: "Food & Staples Retailing"
+    gics_industry: "Consumer Staples Merchandise Retail"
+    gics_sub_industry: "Hypermarkets & Super Centers"
+
+  - ticker: COST
+    name: "Costco Wholesale Corporation"
+    gics_sector: "Consumer Staples"
+    gics_industry_group: "Food & Staples Retailing"
+    gics_industry: "Consumer Staples Merchandise Retail"
+    gics_sub_industry: "Warehouse Clubs & Supercenters"
+
+  # ── Energy ──────────────────────────────────────────────────────────────────
+  - ticker: XOM
+    name: "Exxon Mobil Corporation"
+    gics_sector: "Energy"
+    gics_industry_group: "Energy"
+    gics_industry: "Integrated Oil & Gas"
+    gics_sub_industry: "Integrated Oil & Gas"
+
+  - ticker: CVX
+    name: "Chevron Corporation"
+    gics_sector: "Energy"
+    gics_industry_group: "Energy"
+    gics_industry: "Integrated Oil & Gas"
+    gics_sub_industry: "Integrated Oil & Gas"
+
+  - ticker: COP
+    name: "ConocoPhillips"
+    gics_sector: "Energy"
+    gics_industry_group: "Energy"
+    gics_industry: "Oil & Gas Exploration & Production"
+    gics_sub_industry: "Oil & Gas Exploration & Production"
+
+  # ── Industrials ─────────────────────────────────────────────────────────────
+  - ticker: CAT
+    name: "Caterpillar Inc."
+    gics_sector: "Industrials"
+    gics_industry_group: "Capital Goods"
+    gics_industry: "Construction Machinery & Heavy Transportation Equipment"
+    gics_sub_industry: "Construction Machinery & Heavy Trucks"
+
+  - ticker: HON
+    name: "Honeywell International Inc."
+    gics_sector: "Industrials"
+    gics_industry_group: "Capital Goods"
+    gics_industry: "Industrial Conglomerates"
+    gics_sub_industry: "Industrial Conglomerates"
+
+  - ticker: BA
+    name: "The Boeing Company"
+    gics_sector: "Industrials"
+    gics_industry_group: "Capital Goods"
+    gics_industry: "Aerospace & Defense"
+    gics_sub_industry: "Aerospace & Defense"
+
+  - ticker: DE
+    name: "Deere & Company"
+    gics_sector: "Industrials"
+    gics_industry_group: "Capital Goods"
+    gics_industry: "Agricultural & Farm Machinery"
+    gics_sub_industry: "Agricultural & Farm Machinery"
+
+  - ticker: UPS
+    name: "United Parcel Service Inc."
+    gics_sector: "Industrials"
+    gics_industry_group: "Transportation"
+    gics_industry: "Air Freight & Logistics"
+    gics_sub_industry: "Air Freight & Logistics"
+
+  # ── Materials ───────────────────────────────────────────────────────────────
+  - ticker: LIN
+    name: "Linde plc"
+    gics_sector: "Materials"
+    gics_industry_group: "Materials"
+    gics_industry: "Industrial Gases"
+    gics_sub_industry: "Industrial Gases"
+
+  - ticker: APD
+    name: "Air Products and Chemicals Inc."
+    gics_sector: "Materials"
+    gics_industry_group: "Materials"
+    gics_industry: "Industrial Gases"
+    gics_sub_industry: "Industrial Gases"
+
+  - ticker: NEM
+    name: "Newmont Corporation"
+    gics_sector: "Materials"
+    gics_industry_group: "Materials"
+    gics_industry: "Gold"
+    gics_sub_industry: "Gold"
+
+  # ── Utilities ───────────────────────────────────────────────────────────────
+  - ticker: NEE
+    name: "NextEra Energy Inc."
+    gics_sector: "Utilities"
+    gics_industry_group: "Utilities"
+    gics_industry: "Electric Utilities"
+    gics_sub_industry: "Electric Utilities"
+
+  - ticker: DUK
+    name: "Duke Energy Corporation"
+    gics_sector: "Utilities"
+    gics_industry_group: "Utilities"
+    gics_industry: "Electric Utilities"
+    gics_sub_industry: "Electric Utilities"
+
+  - ticker: SO
+    name: "The Southern Company"
+    gics_sector: "Utilities"
+    gics_industry_group: "Utilities"
+    gics_industry: "Electric Utilities"
+    gics_sub_industry: "Electric Utilities"
+
+  # ── Real Estate ─────────────────────────────────────────────────────────────
+  - ticker: PLD
+    name: "Prologis Inc."
+    gics_sector: "Real Estate"
+    gics_industry_group: "Real Estate"
+    gics_industry: "Industrial REITs"
+    gics_sub_industry: "Industrial REITs"
+
+  - ticker: AMT
+    name: "American Tower Corporation"
+    gics_sector: "Real Estate"
+    gics_industry_group: "Real Estate"
+    gics_industry: "Telecom Tower REITs"
+    gics_sub_industry: "Telecom Tower REITs"
+
+  - ticker: EQIX
+    name: "Equinix Inc."
+    gics_sector: "Real Estate"
+    gics_industry_group: "Real Estate"
+    gics_industry: "Data Center REITs"
+    gics_sub_industry: "Data Center REITs"

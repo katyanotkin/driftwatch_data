@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Backfill OHLCV history to CSV, BigQuery, or both."""
+"""CLI: backfill ticker_daily + ticker_features for a date range."""
 from __future__ import annotations
 
 import argparse
@@ -8,148 +8,193 @@ import datetime
 import logging
 import os
 import sys
-from typing import Iterable
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(name)s %(message)s",
 )
-log = logging.getLogger("driftwatch.backfill")
+log = logging.getLogger("sigforge.backfill")
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from driftwatch.bq_client import BQClient
-from driftwatch.models import OHLCVRow
-from driftwatch.settings import load_tickers
-from driftwatch.yf_client import fetch_ohlcv_history_range_batch
+from sigforge.bq_client import BQClient
+from sigforge.features import pipeline as feat_pipeline
+from sigforge.models import FeatureRow, RawBar
+from sigforge.settings import get_sector_map, load_tickers, settings
+from sigforge.yf_client import clear_cache, get_history, get_info
 
+_DAILY_EXCLUDE = {"ingested_at", "data_source"}
+_DAILY_FIELDS = [f for f in RawBar.model_fields if f not in _DAILY_EXCLUDE]
 
-_EXCLUDE = {"ingested_at", "data_source"}
-_FIELDNAMES = [
-    field_name for field_name in OHLCVRow.model_fields if field_name not in _EXCLUDE
-]
+_FEATURE_EXCLUDE: set[str] = set()
+_FEATURE_FIELDS = list(FeatureRow.model_fields)
 
 
 def parse_args() -> argparse.Namespace:
     yesterday = datetime.date.today() - datetime.timedelta(days=1)
     default_start = yesterday - datetime.timedelta(days=30)
 
-    parser = argparse.ArgumentParser(
-        description="Backfill ETF OHLCV history to CSV, BigQuery, or both.",
-    )
-    parser.add_argument(
-        "--start-date",
-        type=datetime.date.fromisoformat,
-        default=default_start,
-        help="Inclusive start date in YYYY-MM-DD format.",
-    )
-    parser.add_argument(
-        "--end-date",
-        type=datetime.date.fromisoformat,
-        default=yesterday,
-        help="Inclusive end date in YYYY-MM-DD format.",
-    )
-    parser.add_argument(
-        "--target",
-        choices=["csv", "bq", "both"],
-        default="bq",
-        help="Where to write the backfill output.",
-    )
-    parser.add_argument(
-        "--out-csv",
-        default="data/backfill.csv",
-        help="CSV path when target is csv or both.",
-    )
-    parser.add_argument(
-        "--symbols",
-        nargs="*",
-        help="Optional explicit symbol list. If omitted, load from settings.",
-    )
-    return parser.parse_args()
+    p = argparse.ArgumentParser(description="Backfill sigforge OHLCV + features.")
+    p.add_argument("--start", dest="start_date", type=datetime.date.fromisoformat,
+                   default=default_start, metavar="YYYY-MM-DD")
+    p.add_argument("--end", dest="end_date", type=datetime.date.fromisoformat,
+                   default=yesterday, metavar="YYYY-MM-DD")
+    p.add_argument("--env", choices=["prod", "stage"], default=None,
+                   help="Override DW_ENV (set DW_ENV env var for persistent override)")
+    p.add_argument("--out-csv", metavar="PATH",
+                   help="Write CSV to PATH instead of BigQuery")
+    p.add_argument("--symbols", nargs="*",
+                   help="Explicit symbol list; defaults to config/symbols.yaml")
+    return p.parse_args()
 
 
-def write_csv(rows: Iterable[OHLCVRow], out_csv: str) -> int:
-    os.makedirs(os.path.dirname(out_csv) or ".", exist_ok=True)
-
-    row_count = 0
-    with open(out_csv, "w", newline="") as csv_file:
-        writer = csv.DictWriter(csv_file, fieldnames=_FIELDNAMES)
-        writer.writeheader()
-
-        for row in rows:
-            writer.writerow(row.to_csv_dict())
-            row_count += 1
-
-    return row_count
+def trading_days(start: datetime.date, end: datetime.date):
+    cur = start
+    while cur <= end:
+        if cur.weekday() < 5:   # Mon–Fri
+            yield cur
+        cur += datetime.timedelta(days=1)
 
 
 def main() -> int:
     args = parse_args()
 
     if args.start_date > args.end_date:
-        raise ValueError("start-date must be <= end-date")
+        log.error("--start must be <= --end")
+        return 1
 
     symbols = args.symbols or load_tickers()
     if not symbols:
-        raise ValueError("No symbols provided and load_tickers() returned empty")
-
-    log.info(
-        "Backfill start | symbols=%d target=%s start=%s end=%s",
-        len(symbols),
-        args.target,
-        args.start_date,
-        args.end_date,
-    )
-
-    all_rows = fetch_ohlcv_history_range_batch(
-        symbols=symbols,
-        start_date=args.start_date,
-        end_date=args.end_date,
-    )
-
-    if not all_rows:
-        log.error("No rows fetched for any symbol")
+        log.error("No symbols — check config/symbols.yaml")
         return 1
 
-    symbols_with_data = {row.symbol for row in all_rows}
-    symbols_with_no_data = sorted(set(symbols) - symbols_with_data)
-    total_symbols_with_no_data = len(symbols_with_no_data)
+    log.info(
+        "Backfill | symbols=%d start=%s end=%s target=%s",
+        len(symbols),
+        args.start_date,
+        args.end_date,
+        "csv" if args.out_csv else "bq",
+    )
 
-    if symbols_with_no_data:
-        log.warning(
-            "No data returned for %d symbols: %s",
-            total_symbols_with_no_data,
-            ", ".join(symbols_with_no_data),
+    # Pre-fetch 252-day history for all symbols (shared across all dates)
+    log.info("Pre-fetching history for %d symbols …", len(symbols))
+    raw_bars = {sym: get_history(sym, lookback_days=settings.history_days, end_date=args.end_date)
+                for sym in symbols}
+    spy_bars = get_history("SPY", lookback_days=settings.history_days, end_date=args.end_date)
+    info_dict = {sym: get_info(sym) for sym in symbols}
+    sector_map = get_sector_map()
+
+    all_daily_rows: list[RawBar] = []
+    all_feature_rows: list[FeatureRow] = []
+    total_errors: list[str] = []
+
+    for trade_date in trading_days(args.start_date, args.end_date):
+        # Extract daily rows for this date from pre-fetched history
+        day_daily: list[RawBar] = []
+        for sym in symbols:
+            df = raw_bars.get(sym)
+            if df is None or df.empty or trade_date not in df.index:
+                continue
+            row_s = df.loc[trade_date]
+            past = df[df.index <= trade_date].tail(30)
+            avg_vol = float(past["Volume"].mean()) if len(past) > 0 else None
+            day_daily.append(RawBar(
+                symbol=sym,
+                trade_date=trade_date,
+                open=_sf(row_s.get("Open")),
+                high=_sf(row_s.get("High")),
+                low=_sf(row_s.get("Low")),
+                close=_sf(row_s.get("Close")),
+                volume=_si(row_s.get("Volume")),
+                avg_volume_30d=avg_vol,
+            ))
+
+        day_features, feat_result = feat_pipeline.run(
+            symbols=symbols,
+            feature_date=trade_date,
+            raw_bars=raw_bars,
+            spy_bars=spy_bars,
+            info_dict=info_dict,
+            sector_map=sector_map,
+        )
+
+        all_daily_rows.extend(day_daily)
+        all_feature_rows.extend(day_features)
+        total_errors.extend(feat_result.errors)
+
+        log.info(
+            "%s | daily=%d features=%d errors=%d",
+            trade_date,
+            len(day_daily),
+            len(day_features),
+            len(feat_result.errors),
         )
 
     log.info(
-        "Fetched %d total rows across %d symbols",
-        len(all_rows),
-        len(symbols_with_data),
+        "Backfill totals | daily=%d features=%d errors=%d",
+        len(all_daily_rows),
+        len(all_feature_rows),
+        len(total_errors),
     )
 
-    rows_written_csv = 0
-    rows_written_bq = 0
+    if args.out_csv:
+        _write_csv(all_daily_rows, all_feature_rows, args.out_csv)
+    else:
+        bq = BQClient()
+        bq.ensure_tables()
+        if all_daily_rows:
+            bq.upsert_daily(all_daily_rows)
+        if all_feature_rows:
+            bq.upsert_features(all_feature_rows)
 
-    if args.target in {"csv", "both"}:
-        rows_written_csv = write_csv(all_rows, args.out_csv)
-        log.info("Wrote %d rows to CSV: %s", rows_written_csv, args.out_csv)
-
-    if args.target in {"bq", "both"}:
-        bq_client = BQClient()
-        bq_client.ensure_tables()
-        rows_written_bq = bq_client.replace_ohlcv_rows(all_rows)
-        log.info("Added %d rows to BigQuery", rows_written_bq)
-
-    log.info(
-        "Backfill done | fetched_rows=%d symbols_with_no_data=%d csv_rows=%d bq_rows=%d",
-        len(all_rows),
-        total_symbols_with_no_data,
-        rows_written_csv,
-        rows_written_bq,
-    )
-
+    clear_cache()
     return 0
+
+
+def _write_csv(
+    daily_rows: list[RawBar],
+    feature_rows: list[FeatureRow],
+    out_path: str,
+) -> None:
+    base, ext = os.path.splitext(out_path)
+    ext = ext or ".csv"
+
+    daily_path = f"{base}_daily{ext}"
+    feat_path = f"{base}_features{ext}"
+
+    os.makedirs(os.path.dirname(os.path.abspath(daily_path)), exist_ok=True)
+
+    if daily_rows:
+        with open(daily_path, "w", newline="") as fh:
+            writer = csv.DictWriter(fh, fieldnames=_DAILY_FIELDS)
+            writer.writeheader()
+            writer.writerows(r.to_csv_dict() for r in daily_rows)
+        log.info("Wrote %d daily rows → %s", len(daily_rows), daily_path)
+
+    if feature_rows:
+        feat_fieldnames = [f for f in FeatureRow.model_fields if f not in {"ingested_at", "run_id"}]
+        with open(feat_path, "w", newline="") as fh:
+            writer = csv.DictWriter(fh, fieldnames=feat_fieldnames)
+            writer.writeheader()
+            writer.writerows(r.to_csv_dict() for r in feature_rows)
+        log.info("Wrote %d feature rows → %s", len(feature_rows), feat_path)
+
+
+def _sf(v: object) -> float | None:
+    import math
+    if v is None:
+        return None
+    try:
+        f = float(v)  # type: ignore[arg-type]
+        return None if math.isnan(f) else f
+    except (TypeError, ValueError):
+        return None
+
+
+def _si(v: object) -> int | None:
+    f = _sf(v)
+    return None if f is None else int(f)
+
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -1,7 +1,9 @@
 yfinance
+numpy
+pandas
 google-cloud-bigquery
-anthropic
 pydantic-settings
 pyyaml
+anthropic
 ruff
 pytest
