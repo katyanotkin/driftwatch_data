@@ -8,6 +8,7 @@ import pandas as pd
 import yfinance as yf
 
 from sigforge.models import ProfileRow, RawBar
+from sigforge.utils import safe_float, safe_int
 
 log = logging.getLogger(__name__)
 
@@ -194,24 +195,19 @@ def _extract_symbol(
     if isinstance(df.columns, pd.MultiIndex):
         if symbol in df.columns.get_level_values(0):
             return df[symbol].dropna(how="all")
+        return None
+    # yfinance returned flat columns despite multiple symbols being requested
+    # (happens when only one ticker had data). Check if Close column exists as
+    # a best-effort fallback; caller must decide if this is the right symbol.
+    if "Close" in df.columns:
+        log.warning(
+            "%s: batch response has flat columns — yfinance may have returned "
+            "data for a different symbol; treating as this symbol's data",
+            symbol,
+        )
+        return df.dropna(how="all")
     return None
 
 
-def _safe_float(value: object) -> Optional[float]:
-    if value is None:
-        return None
-    try:
-        v = float(value)  # type: ignore[arg-type]
-        return None if pd.isna(v) else v
-    except (TypeError, ValueError):
-        return None
-
-
-def _safe_int(value: object) -> Optional[int]:
-    if value is None:
-        return None
-    try:
-        v = float(value)  # type: ignore[arg-type]
-        return None if pd.isna(v) else int(v)
-    except (TypeError, ValueError):
-        return None
+_safe_float = safe_float
+_safe_int = safe_int

@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import datetime
 import logging
+import math
+import uuid
 
 import pandas as pd
 
@@ -69,26 +71,44 @@ def run(
             continue
 
         features: dict = {}
+        module_errors: list[str] = []
 
-        features.update(_run_module("return_based", symbol, return_based.compute, bars, spy_bars))
-        features.update(_run_module("microstructure", symbol, microstructure.compute, bars))
+        for mod_name, fn, args in [
+            ("return_based", return_based.compute, (bars, spy_bars)),
+            ("microstructure", microstructure.compute, (bars,)),
+        ]:
+            out, err = _run_module(mod_name, symbol, fn, *args)
+            features.update(out)
+            if err:
+                module_errors.append(err)
 
         sector = sector_map.get(symbol, "")
-        peer_map = {k: v for k, v in peers_by_sector.get(sector, {}).items() if k != symbol}
-        features.update(
-            _run_module("correlation", symbol, correlation.compute, symbol, bars, peer_map)
-        )
+        peer_map = {
+            k: v for k, v in peers_by_sector.get(sector, {}).items() if k != symbol
+        }
+        out, err = _run_module("correlation", symbol, correlation.compute, symbol, bars, peer_map)
+        features.update(out)
+        if err:
+            module_errors.append(err)
 
         info = info_dict.get(symbol, {})
-        features.update(_run_module("fundamental", symbol, fundamental.compute, info))
+        out, err = _run_module("fundamental", symbol, fundamental.compute, info)
+        features.update(out)
+        if err:
+            module_errors.append(err)
 
-        # Build FeatureRow — unknown keys are silently ignored by pydantic
+        for error in module_errors:
+            result.add_error(error)
+
+        # Sanitise: replace any inf/nan that slipped through with None
+        clean = _sanitize(features)
+
         row_data: dict = {
             "symbol": symbol,
             "feature_date": feature_date,
             "run_id": run_id,
         }
-        row_data.update({k: v for k, v in features.items() if k in _FEATURE_FIELDS})
+        row_data.update({k: v for k, v in clean.items() if k in _FEATURE_FIELDS})
 
         feature_rows.append(FeatureRow(**row_data))
         result.symbols_processed += 1
@@ -96,14 +116,32 @@ def run(
     return feature_rows, result
 
 
-def _run_module(module_name: str, symbol: str, fn, *args, **kwargs) -> dict:
-    """Call a feature module function; log error and return empty dict on failure."""
+def _run_module(
+    module_name: str, symbol: str, fn, *args, **kwargs
+) -> tuple[dict, str | None]:
+    """
+    Call a feature module function.
+    Returns (result_dict, error_message_or_None).
+    """
     try:
-        return fn(*args, **kwargs)
+        return fn(*args, **kwargs), None
     except Exception as exc:
-        log.error("%s: module %s failed: %s", symbol, module_name, exc)
-        return {}
+        msg = f"{symbol}: module {module_name} failed: {exc}"
+        log.error(msg)
+        return {}, msg
+
+
+def _sanitize(features: dict) -> dict:
+    """Replace float inf/nan values with None."""
+    out = {}
+    for k, v in features.items():
+        if isinstance(v, float) and (math.isnan(v) or math.isinf(v)):
+            log.warning("Feature %s is %s — replacing with None", k, v)
+            out[k] = None
+        else:
+            out[k] = v
+    return out
 
 
 def _make_run_id(feature_date: datetime.date) -> str:
-    return f"features-{feature_date.isoformat()}"
+    return f"features-{feature_date.isoformat()}-{uuid.uuid4().hex[:8]}"

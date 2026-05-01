@@ -68,6 +68,35 @@ class TestCorrelation:
             "PEER1": _make_bars(n=150, seed=1),
             "PEER2": _make_bars(n=150, seed=2),
         }
-        # Should still compute (TARGET is skipped internally)
         result = correlation.compute("TARGET", bars, peers_with_self)
         assert isinstance(result, dict)
+
+    def test_constant_return_peer_yields_none_not_nan(self, bars):
+        """A peer with constant returns has undefined correlation — must be None."""
+        const_peer = _make_bars(n=150, seed=5).copy()
+        const_peer["Close"] = 100.0  # zero daily returns → NaN correlation
+        peers = {"CONST": const_peer, "PEER1": _make_bars(n=150, seed=2)}
+        result = correlation.compute("TARGET", bars, peers)
+        corr = result.get("cr_rolling_peer_correlation")
+        # Acceptable outcomes: absent or a valid float (not NaN)
+        if corr is not None:
+            import math
+            assert not math.isnan(corr), "cr_rolling_peer_correlation must not be NaN"
+
+    def test_peer_correlation_clamped_to_unit_interval(self):
+        """cr_rolling_peer_correlation must always be in [-1, 1]."""
+        import numpy as np
+        rng = np.random.default_rng(0)
+        n = 150
+        close = 100.0 * np.cumprod(1 + rng.normal(0, 0.01, n))
+        dates = [datetime.date(2025, 1, 1) + datetime.timedelta(days=i) for i in range(n)]
+        bars = pd.DataFrame({"Open": close, "High": close, "Low": close,
+                             "Close": close, "Volume": 1e6}, index=dates)
+        peers = {
+            "P1": _make_bars(n=n, seed=1),
+            "P2": _make_bars(n=n, seed=2),
+        }
+        result = correlation.compute("T", bars, peers)
+        c = result.get("cr_rolling_peer_correlation")
+        if c is not None:
+            assert -1.0 <= c <= 1.0

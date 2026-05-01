@@ -60,12 +60,14 @@ def compute(
 
     # Rolling peer correlation: mean Pearson correlation with sector peers
     corrs = peers_recent.corrwith(stock_recent)
-    result["cr_rolling_peer_correlation"] = float(corrs.mean())
+    mean_corr = corrs.mean()
+    if not pd.isna(mean_corr):
+        result["cr_rolling_peer_correlation"] = max(-1.0, min(1.0, float(mean_corr)))
 
     # Peer return deviation: today's stock return minus sector median return
-    result["cr_peer_return_deviation"] = float(stock_recent.iloc[-1]) - float(
-        peers_recent.iloc[-1].median()
-    )
+    peer_med = peers_recent.iloc[-1].median()
+    if not pd.isna(peer_med):
+        result["cr_peer_return_deviation"] = float(stock_recent.iloc[-1]) - float(peer_med)
 
     # Correlation breakdown score (Mahalanobis distance)
     hist = all_rets.tail(HIST_WINDOW)

@@ -49,7 +49,7 @@ def main() -> int:
     for sym in symbols:
         row = fetch_profile(sym, snapshot_date)
         if row:
-            _backfill_gics(row, sym, all_symbols)
+            row = _backfill_gics(row, sym, all_symbols)
             profile_rows.append(row)
 
     if not profile_rows:
@@ -98,14 +98,17 @@ def main() -> int:
     return 0
 
 
-def _backfill_gics(row, symbol: str, all_symbols: list[dict]) -> None:
-    """Fill missing GICS fields from symbols.yaml when yfinance omits them."""
+def _backfill_gics(row, symbol: str, all_symbols: list[dict]):
+    """Return row with missing GICS fields filled from symbols.yaml."""
     sym_cfg = next((s for s in all_symbols if s["ticker"] == symbol), None)
     if not sym_cfg:
-        return
-    for field in _GICS_FIELDS:
-        if not getattr(row, field) and sym_cfg.get(field):
-            setattr(row, field, sym_cfg[field])
+        return row
+    updates = {
+        field: sym_cfg[field]
+        for field in _GICS_FIELDS
+        if not getattr(row, field) and sym_cfg.get(field)
+    }
+    return row.model_copy(update=updates) if updates else row
 
 
 if __name__ == "__main__":

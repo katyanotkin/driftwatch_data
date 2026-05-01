@@ -50,8 +50,13 @@ def _schema_from_model(model_cls: Type) -> list[bigquery.SchemaField]:
             nullable = True
             ann = non_none[0] if non_none else ann
 
-        type_name = getattr(ann, "__name__", str(ann))
-        bq_type = _PY_TO_BQ.get(type_name, "STRING")
+        # Literal[...] types should map to STRING
+        import typing
+        if getattr(ann, "__origin__", None) is typing.Literal:
+            bq_type = "STRING"
+        else:
+            type_name = getattr(ann, "__name__", str(ann))
+            bq_type = _PY_TO_BQ.get(type_name, "STRING")
         mode = "NULLABLE" if nullable else "REQUIRED"
         schema.append(bigquery.SchemaField(name, bq_type, mode=mode))
     return schema
@@ -198,10 +203,6 @@ class BQClient:
         result: dict[str, ProfileRow] = {}
         for row in self._client.query(sql, job_config=cfg).result():
             d = dict(row)
-            if hasattr(d.get("snapshot_date"), "isoformat"):
-                d["snapshot_date"] = d["snapshot_date"].isoformat()
-            if hasattr(d.get("ingested_at"), "isoformat"):
-                d["ingested_at"] = d["ingested_at"].isoformat()
             result[d["symbol"]] = ProfileRow(**d)
         return result
 

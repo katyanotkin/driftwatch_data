@@ -21,6 +21,7 @@ from sigforge.bq_client import BQClient
 from sigforge.features import pipeline as feat_pipeline
 from sigforge.models import FeatureRow, RawBar
 from sigforge.settings import get_sector_map, load_tickers, settings
+from sigforge.utils import safe_float, safe_int
 from sigforge.yf_client import clear_cache, get_history, get_info
 
 _DAILY_EXCLUDE = {"ingested_at", "data_source"}
@@ -180,20 +181,8 @@ def _write_csv(
         log.info("Wrote %d feature rows → %s", len(feature_rows), feat_path)
 
 
-def _sf(v: object) -> float | None:
-    import math
-    if v is None:
-        return None
-    try:
-        f = float(v)  # type: ignore[arg-type]
-        return None if math.isnan(f) else f
-    except (TypeError, ValueError):
-        return None
-
-
-def _si(v: object) -> int | None:
-    f = _sf(v)
-    return None if f is None else int(f)
+_sf = safe_float
+_si = safe_int
 
 
 if __name__ == "__main__":

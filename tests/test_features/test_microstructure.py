@@ -66,5 +66,12 @@ class TestMicrostructure:
     def test_insufficient_data_returns_empty(self):
         tiny = _make_bars(n=2)
         result = microstructure.compute(tiny)
-        # Most features should be absent or computed with limited data
         assert isinstance(result, dict)
+
+    def test_amihud_all_zero_volume_returns_none(self):
+        """Amihud must be None (not inf) when all volume rows are zero."""
+        bars = _make_bars(n=30)
+        bars = bars.copy()
+        bars["Volume"] = 0.0
+        result = microstructure.compute(bars)
+        assert result.get("ms_amihud_illiquidity") is None
