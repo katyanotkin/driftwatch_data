@@ -3,6 +3,11 @@
 Feature engineering pipeline for individual stocks. Fetches raw data via yfinance,
 computes ML-ready behavioral features, detects structural events, stores in BigQuery.
 
+## Status (2026-06-16)
+- Pipeline is feature-complete: 60-symbol universe, 101 tests passing, dry-run CSVs validated locally.
+- No production BQ write has happened yet — see README-next-steps.md for the first-load checklist.
+- See "Generating data" below for the local workflow (CSV dry run → BQ backfill → daily/profile jobs).
+
 ## Stack
 - Python 3.12, pydantic-settings, pydantic v2, numpy, pandas
 - yfinance for market data
@@ -25,6 +30,10 @@ computes ML-ready behavioral features, detects structural events, stores in BigQ
 - `jobs/` — run_daily.py, run_profile.py, backfill.py, add_note.py
 - `tests/test_features/` — one file per feature module
 - `deploy/Dockerfile` — python:3.12-slim, non-root user
+- `driftwatch/`, `config/settings.yaml` — **legacy**, pre-sigforge ETF pipeline. Nothing
+  in `jobs/` or `sigforge/` imports from `driftwatch/`. Kept alive only by 3 tests
+  (`test_safe_converters.py`, `test_fetch_ohlcv.py`, `test_ohlcv_daily.py`) that exercise
+  the old code directly. Flagged for removal in README-next-steps.md; not deleted yet.
 
 ## BQ tables (sigforge_{env})
 - `ticker_daily`    — upsert on (symbol, trade_date), daily OHLCV + avg_volume_30d
@@ -53,6 +62,11 @@ computes ML-ready behavioral features, detects structural events, stores in BigQ
 - `.env` file: GCP_PROJECT, DW_ENV, ANTHROPIC_API_KEY
 - `config/symbols.yaml`: stocks with ticker, name, and full GICS classification
 - `sigforge/settings.py`: pydantic-settings, validates on startup, exposes load_tickers()
+- `ANTHROPIC_API_KEY` / `claude_model` / `claude_max_tokens` are defined on `Settings` but
+  **unused by any sigforge code path** — no module calls the Claude API. (`run_profile.py`'s
+  `source="claude_auto"` on GICS-reclassification events is a string label, not a live call.)
+  This is a carryover from the legacy `driftwatch/` pipeline, which did call Claude for event
+  detection. Flagged for removal in README-next-steps.md; not deleted yet.
 
 ## Makefile targets
 - `install`, `lint`, `test`
@@ -66,3 +80,17 @@ computes ML-ready behavioral features, detects structural events, stores in BigQ
 ## Market proxy
 - SPY is fetched alongside every symbol for return-based feature computation
 - Called explicitly in run_daily.py and backfill.py via get_history("SPY")
+
+## Generating data
+1. Dry run locally first — no GCP credentials needed, writes CSV only:
+   ```
+   make backfill-local START=2025-01-02 END=2025-01-31 CSV=data/check.csv
+   ```
+   Produces `data/check_daily.csv` and `data/check_features.csv`. Inspect these before
+   touching BigQuery.
+2. Once BQ tables exist (`make bq-init ENV=stage|prod`), drop `CSV=` to write to BigQuery
+   instead, or call the job directly: `PYTHONPATH=. python jobs/backfill.py --start ... --end ...`.
+3. Day-to-day after backfill: `make run-daily ENV=...` (OHLCV + features for today) and
+   `make run-profile ENV=...` (≈6-week profile snapshot + GICS-reclassification events).
+4. Full first-production-load checklist (table init, backfill window, deploy, sanity
+   thresholds to eyeball): see `README-next-steps.md`.

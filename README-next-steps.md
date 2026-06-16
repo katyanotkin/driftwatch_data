@@ -1,8 +1,11 @@
 # sigforge — next steps
 
-Current state: pipeline is feature-complete, 101 tests pass, dry-run CSV validated.
+Current state (2026-06-16): pipeline is feature-complete, 101 tests pass, dry-run CSV validated.
 Schema enrichments (adjusted close, corporate actions, 13 new profile fields, 10 new
 fundamental features) merged. Ready for first production BQ write and Cloud Run deployment.
+No data has been written to BigQuery yet — see section 1 below for the first load.
+
+For local CSV-only data generation (no GCP needed), see "Generating data" in `CLAUDE.md`.
 
 ---
 
@@ -169,3 +172,24 @@ Microstructure stubs in `microstructure.py`:
   send a notification (Cloud Monitoring log-based alert or simple email via SendGrid).
 - Track `symbols_processed` count over time — a sudden drop signals a yfinance outage
   or symbol delistings.
+
+---
+
+## 7. Cleanup backlog (legacy driftwatch, not deleted yet)
+
+The repo still carries the pre-sigforge ETF pipeline. Nothing in `sigforge/` or `jobs/`
+depends on it, but it hasn't been removed:
+
+- `driftwatch/` package — dead, only reachable from its own tests.
+- `config/settings.yaml` — only read by `driftwatch/settings.py`; also has a stale
+  `gcp.project_id` (`driftwatch-492902`) that doesn't match the real project (`driftwatch2`).
+- `tests/test_safe_converters.py`, `tests/test_fetch_ohlcv.py`, `tests/test_ohlcv_daily.py`
+  — exercise `driftwatch/`, not `sigforge/`. They inflate the "101 tests" count with
+  legacy coverage.
+- `ANTHROPIC_API_KEY` / `claude_model` / `claude_max_tokens` on `sigforge/settings.py`'s
+  `Settings` — unused by any sigforge code path. `run_profile.py`'s
+  `source="claude_auto"` event label is just a string, not a real Claude call.
+
+When ready: delete `driftwatch/`, `config/settings.yaml`, the 3 legacy test files, and
+the unused Claude fields on `Settings`; drop `ANTHROPIC_API_KEY` from `.env`/CLAUDE.md
+unless a future feature (e.g. AI-assisted event detection) is planned to use it.
