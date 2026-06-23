@@ -42,7 +42,7 @@ class Settings(BaseSettings):
         if not self.gcp_project_id:
             self.gcp_project_id = self.gcp_project or "teamfish"
         if not self.gcp_dataset_id:
-            self.gcp_dataset_id = f"sigforge_{self.dw_env}"
+            self.gcp_dataset_id = f"teamfish_{self.dw_env}"
         return self
 
     @property

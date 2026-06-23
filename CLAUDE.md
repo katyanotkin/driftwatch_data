@@ -1,4 +1,4 @@
-# sigforge
+# teamfish
 
 Feature engineering pipeline for individual stocks. Fetches raw data via yfinance,
 computes ML-ready behavioral features, detects structural events, stores in BigQuery.
@@ -11,7 +11,7 @@ computes ML-ready behavioral features, detects structural events, stores in BigQ
 ## Stack
 - Python 3.12, pydantic-settings, pydantic v2, numpy, pandas
 - yfinance for market data
-- Google BigQuery (dataset: sigforge_prod / sigforge_stage)
+- Google BigQuery (dataset: teamfish_prod / teamfish_stage)
 - Cloud Run Jobs + Cloud Scheduler for production
 - ruff for linting, pytest for tests
 
@@ -35,7 +35,7 @@ computes ML-ready behavioral features, detects structural events, stores in BigQ
   (`test_safe_converters.py`, `test_fetch_ohlcv.py`, `test_ohlcv_daily.py`) that exercise
   the old code directly. Flagged for removal in README-next-steps.md; not deleted yet.
 
-## BQ tables (sigforge_{env})
+## BQ tables (teamfish_{env})
 - `ticker_daily`    — upsert on (symbol, trade_date), daily OHLCV + avg_volume_30d
 - `ticker_profile`  — upsert on (symbol, snapshot_date), ~6-week profile snapshots
 - `ticker_features` — upsert on (symbol, feature_date), wide table, all feature columns
@@ -63,7 +63,7 @@ computes ML-ready behavioral features, detects structural events, stores in BigQ
 - `config/symbols.yaml`: stocks with ticker, name, and full GICS classification
 - `sigforge/settings.py`: pydantic-settings, validates on startup, exposes load_tickers()
 - `ANTHROPIC_API_KEY` / `claude_model` / `claude_max_tokens` are defined on `Settings` but
-  **unused by any sigforge code path** — no module calls the Claude API. (`run_profile.py`'s
+  **unused by any teamfish code path** — no module calls the Claude API. (`run_profile.py`'s
   `source="claude_auto"` on GICS-reclassification events is a string label, not a live call.)
   This is a carryover from the legacy `driftwatch/` pipeline, which did call Claude for event
   detection. Flagged for removal in README-next-steps.md; not deleted yet.

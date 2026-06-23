@@ -3,11 +3,11 @@ PIP     := .venv/bin/pip
 PROJECT ?= $(shell grep GCP_PROJECT .env 2>/dev/null | cut -d= -f2 | tr -d ' ')
 REGION  ?= us-central1
 ENV     ?= prod
-IMAGE   ?= gcr.io/$(PROJECT)/sigforge
+IMAGE   ?= gcr.io/$(PROJECT)/teamfish
 
-JOB_DAILY   := sigforge-daily-$(ENV)
-JOB_PROFILE := sigforge-profile-$(ENV)
-SA          := sigforge-sa@$(PROJECT).iam.gserviceaccount.com
+JOB_DAILY   := teamfish-daily-$(ENV)
+JOB_PROFILE := teamfish-profile-$(ENV)
+SA          := teamfish-sa@$(PROJECT).iam.gserviceaccount.com
 
 .PHONY: help install lint test \
         run-daily run-profile add-note backfill-local \
@@ -19,7 +19,7 @@ SA          := sigforge-sa@$(PROJECT).iam.gserviceaccount.com
 
 help:
 	@echo ""
-	@echo "  sigforge — available targets"
+	@echo "  teamfish — available targets"
 	@echo ""
 	@echo "  Dev"
 	@echo "    install             Install Python dependencies into .venv"
@@ -96,7 +96,7 @@ gcp-setup: gcp-billing gcp-apis gcp-sa
 
 gcp-billing:
 	@echo ">>> Creating project $(PROJECT) ..."
-	gcloud projects create $(PROJECT) --name="sigforge" || true
+	gcloud projects create $(PROJECT) --name="teamfish" || true
 	@echo ">>> Detecting billing account ..."
 	$(eval BILLING := $(shell gcloud billing accounts list \
 	  --filter="open=true" --format="value(name)" --limit=1))
@@ -116,8 +116,8 @@ gcp-apis:
 	  --project=$(PROJECT)
 
 gcp-sa:
-	gcloud iam service-accounts create sigforge-sa \
-	  --display-name="sigforge Service Account" \
+	gcloud iam service-accounts create teamfish-sa \
+	  --display-name="teamfish Service Account" \
 	  --project=$(PROJECT) || true
 
 	gcloud projects add-iam-policy-binding $(PROJECT) \

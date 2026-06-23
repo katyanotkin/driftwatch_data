@@ -1,7 +1,7 @@
-# GCP Setup — sigforge 
+# GCP Setup — teamfish
 
 **Project:** `teamfish`
-**Dataset:** `sigforge_prod` / `sigforge_stage`
+**Dataset:** `teamfish_prod` / `teamfish_stage`
 **Target account:** `katyanotkin@gmail.com`
 
 > **Two accounts are configured on this machine.**
@@ -73,11 +73,11 @@ gcloud services enable \
 ## 3. Create service account (one-time)
 
 ```bash
-gcloud iam service-accounts create sigforge-sa \
-  --display-name="sigforge Service Account" \
+gcloud iam service-accounts create teamfish-sa \
+  --display-name="teamfish Service Account" \
   --project=teamfish
 
-SA=sigforge-sa@teamfish.iam.gserviceaccount.com
+SA=teamfish-sa@teamfish.iam.gserviceaccount.com
 
 gcloud projects add-iam-policy-binding teamfish \
   --member="serviceAccount:$SA" --role="roles/bigquery.dataEditor" --quiet
@@ -125,7 +125,7 @@ make bq-init PROJECT=teamfish ENV=prod
 make bq-init PROJECT=teamfish ENV=stage
 ```
 
-This creates `teamfish.sigforge_prod` and `teamfish.sigforge_stage`
+This creates `teamfish.teamfish_prod` and `teamfish.teamfish_stage`
 with tables: `ticker_daily`, `ticker_profile`, `ticker_features`, `ticker_events`.
 
 ---
@@ -153,7 +153,7 @@ gcloud config get-value project   # must be teamfish
 
 make docker-build PROJECT=teamfish
 make docker-push  PROJECT=teamfish
-# Image: gcr.io/teamfish/sigforge:latest
+# Image: gcr.io/teamfish/teamfish:latest
 ```
 
 ---

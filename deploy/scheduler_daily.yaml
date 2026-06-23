@@ -2,11 +2,11 @@
 # Runs Mon–Fri at 22:00 UTC (1 hour after US market close at 21:00 UTC)
 #
 # Create:
-#   gcloud scheduler jobs create http driftwatch-daily-trigger \
+#   gcloud scheduler jobs create http teamfish-daily-trigger \
 #     --schedule="0 22 * * 1-5" \
-#     --uri="https://us-central1-run.googleapis.com/apis/run.googleapis.com/v1/namespaces/teamfish/jobs/driftwatch-daily:run" \
+#     --uri="https://us-central1-run.googleapis.com/apis/run.googleapis.com/v1/namespaces/teamfish/jobs/teamfish-daily:run" \
 #     --http-method=POST \
-#     --oauth-service-account-email=driftwatch-sa@teamfish.iam.gserviceaccount.com \
+#     --oauth-service-account-email=teamfish-sa@teamfish.iam.gserviceaccount.com \
 #     --location=us-central1 \
 #     --time-zone="UTC"
 #
@@ -16,6 +16,6 @@ schedule: "0 22 * * 1-5"
 timezone: UTC
 target:
   type: cloud_run_job
-  job_id: driftwatch-daily
+  job_id: teamfish-daily
   region: us-central1
   command: ["python", "jobs/run_daily.py"]

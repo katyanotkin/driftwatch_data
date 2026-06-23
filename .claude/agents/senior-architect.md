@@ -1,6 +1,6 @@
 ---
 name: senior-architect
-description: Reviews and designs the sigforge pipeline architecture, BQ schema, module boundaries, and GCP cost posture. Invoke when adding new feature modules, changing BQ schema, or evaluating Cloud Run/Scheduler trade-offs.
+description: Reviews and designs the teamfish pipeline architecture, BQ schema, module boundaries, and GCP cost posture. Invoke when adding new feature modules, changing BQ schema, or evaluating Cloud Run/Scheduler trade-offs.
 tools: Read, Grep, Glob, Bash, WebFetch
 model: opus
 ---

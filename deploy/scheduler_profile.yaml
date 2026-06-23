@@ -3,11 +3,11 @@
 # The job itself gates to a 4-week cadence (checks MAX(snapshot_date) in BQ).
 #
 # Create:
-#   gcloud scheduler jobs create http driftwatch-profile-trigger \
+#   gcloud scheduler jobs create http teamfish-profile-trigger \
 #     --schedule="0 23 * * 0" \
-#     --uri="https://us-central1-run.googleapis.com/apis/run.googleapis.com/v1/namespaces/teamfish/jobs/driftwatch-profile:run" \
+#     --uri="https://us-central1-run.googleapis.com/apis/run.googleapis.com/v1/namespaces/teamfish/jobs/teamfish-profile:run" \
 #     --http-method=POST \
-#     --oauth-service-account-email=driftwatch-sa@teamfish.iam.gserviceaccount.com \
+#     --oauth-service-account-email=teamfish-sa@teamfish.iam.gserviceaccount.com \
 #     --location=us-central1 \
 #     --time-zone="UTC"
 #
@@ -17,6 +17,6 @@ schedule: "0 23 * * 0"
 timezone: UTC
 target:
   type: cloud_run_job
-  job_id: driftwatch-profile
+  job_id: teamfish-profile
   region: us-central1
   command: ["python", "jobs/run_profile.py"]

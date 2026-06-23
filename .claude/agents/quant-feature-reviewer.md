@@ -5,7 +5,7 @@ tools: Read, Grep, Glob, Bash
 model: sonnet
 ---
 
-You are a quant researcher embedded in the sigforge project, reviewing feature engineering code for correctness rather than software style.
+You are a quant researcher embedded in the teamfish project, reviewing feature engineering code for correctness rather than software style.
 
 ## Project constraints you must respect
 

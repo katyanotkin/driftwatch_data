@@ -1,4 +1,4 @@
-# sigforge — next steps
+# teamfish — next steps
 
 Current state (2026-06-16): pipeline is feature-complete, 101 tests pass, dry-run CSV validated.
 Schema enrichments (adjusted close, corporate actions, 13 new profile fields, 10 new
@@ -21,10 +21,10 @@ make bq-init ENV=prod
 > must drop them first — BigQuery does not add columns automatically:
 >
 > ```bash
-> bq rm -f -t teamfish:sigforge_prod.ticker_daily
-> bq rm -f -t teamfish:sigforge_prod.ticker_profile
-> bq rm -f -t teamfish:sigforge_prod.ticker_features
-> bq rm -f -t teamfish:sigforge_prod.ticker_events
+> bq rm -f -t teamfish:teamfish_prod.ticker_daily
+> bq rm -f -t teamfish:teamfish_prod.ticker_profile
+> bq rm -f -t teamfish:teamfish_prod.ticker_features
+> bq rm -f -t teamfish:teamfish_prod.ticker_events
 > make bq-init ENV=prod
 > ```
 
@@ -85,7 +85,7 @@ make scheduler-profile ENV=prod  # Sundays 23:00 UTC (≈ 6-week cadence)
 After the scheduler fires (or trigger manually):
 
 ```bash
-gcloud run jobs execute sigforge-daily-prod --region=us-central1 --project=teamfish --wait
+gcloud run jobs execute teamfish-daily-prod --region=us-central1 --project=teamfish --wait
 ```
 
 Check BQ:
@@ -94,8 +94,8 @@ Check BQ:
 -- Spot-check features for the most recent date
 SELECT symbol, feature_date, rb_rolling_beta, ms_realized_volatility,
        fu_float_turnover, fu_short_pct_float
-FROM `teamfish.sigforge_prod.ticker_features`
-WHERE feature_date = (SELECT MAX(feature_date) FROM `teamfish.sigforge_prod.ticker_features`)
+FROM `teamfish.teamfish_prod.ticker_features`
+WHERE feature_date = (SELECT MAX(feature_date) FROM `teamfish.teamfish_prod.ticker_features`)
 ORDER BY symbol
 LIMIT 20;
 ```
@@ -186,7 +186,7 @@ depends on it, but it hasn't been removed:
   — exercise `driftwatch/`, not `sigforge/`. They inflate the "101 tests" count with
   legacy coverage.
 - `ANTHROPIC_API_KEY` / `claude_model` / `claude_max_tokens` on `sigforge/settings.py`'s
-  `Settings` — unused by any sigforge code path. `run_profile.py`'s
+  `Settings` — unused by any teamfish code path. `run_profile.py`'s
   `source="claude_auto"` event label is just a string, not a real Claude call.
 
 When ready: delete `driftwatch/`, `config/settings.yaml`, the 3 legacy test files, and
