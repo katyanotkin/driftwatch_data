@@ -57,7 +57,7 @@ class Settings(BaseSettings):
         if not self.gcp_project_id:
             self.gcp_project_id = (
                 self.gcp_project_dw
-                or gcp.get("project_id", "your-gcp-project")
+                or gcp.get("project_id", "teamfish")
             )
 
         # Dataset: settings.yaml override > derived from env

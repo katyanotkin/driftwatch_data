@@ -1,5 +1,5 @@
 gcp:
-  project_id: "driftwatch-492902"
+  project_id: "teamfish"
   # dataset_id is derived automatically as driftwatch_{env} (stage or prod)
   # override here only if you want a custom name
   location: "US"

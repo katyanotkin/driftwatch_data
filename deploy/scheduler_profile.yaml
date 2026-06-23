@@ -5,13 +5,13 @@
 # Create:
 #   gcloud scheduler jobs create http driftwatch-profile-trigger \
 #     --schedule="0 23 * * 0" \
-#     --uri="https://us-central1-run.googleapis.com/apis/run.googleapis.com/v1/namespaces/YOUR_PROJECT/jobs/driftwatch-profile:run" \
+#     --uri="https://us-central1-run.googleapis.com/apis/run.googleapis.com/v1/namespaces/teamfish/jobs/driftwatch-profile:run" \
 #     --http-method=POST \
-#     --oauth-service-account-email=driftwatch-sa@YOUR_PROJECT.iam.gserviceaccount.com \
+#     --oauth-service-account-email=driftwatch-sa@teamfish.iam.gserviceaccount.com \
 #     --location=us-central1 \
 #     --time-zone="UTC"
 #
-# Or use: make scheduler-profile PROJECT=your-gcp-project
+# Or use: make scheduler-profile PROJECT=teamfish
 
 schedule: "0 23 * * 0"
 timezone: UTC

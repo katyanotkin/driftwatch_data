@@ -21,10 +21,10 @@ make bq-init ENV=prod
 > must drop them first — BigQuery does not add columns automatically:
 >
 > ```bash
-> bq rm -f -t driftwatch2:sigforge_prod.ticker_daily
-> bq rm -f -t driftwatch2:sigforge_prod.ticker_profile
-> bq rm -f -t driftwatch2:sigforge_prod.ticker_features
-> bq rm -f -t driftwatch2:sigforge_prod.ticker_events
+> bq rm -f -t teamfish:sigforge_prod.ticker_daily
+> bq rm -f -t teamfish:sigforge_prod.ticker_profile
+> bq rm -f -t teamfish:sigforge_prod.ticker_features
+> bq rm -f -t teamfish:sigforge_prod.ticker_events
 > make bq-init ENV=prod
 > ```
 
@@ -85,7 +85,7 @@ make scheduler-profile ENV=prod  # Sundays 23:00 UTC (≈ 6-week cadence)
 After the scheduler fires (or trigger manually):
 
 ```bash
-gcloud run jobs execute sigforge-daily-prod --region=us-central1 --project=driftwatch2 --wait
+gcloud run jobs execute sigforge-daily-prod --region=us-central1 --project=teamfish --wait
 ```
 
 Check BQ:
@@ -94,8 +94,8 @@ Check BQ:
 -- Spot-check features for the most recent date
 SELECT symbol, feature_date, rb_rolling_beta, ms_realized_volatility,
        fu_float_turnover, fu_short_pct_float
-FROM `driftwatch2.sigforge_prod.ticker_features`
-WHERE feature_date = (SELECT MAX(feature_date) FROM `driftwatch2.sigforge_prod.ticker_features`)
+FROM `teamfish.sigforge_prod.ticker_features`
+WHERE feature_date = (SELECT MAX(feature_date) FROM `teamfish.sigforge_prod.ticker_features`)
 ORDER BY symbol
 LIMIT 20;
 ```
@@ -181,8 +181,7 @@ The repo still carries the pre-sigforge ETF pipeline. Nothing in `sigforge/` or 
 depends on it, but it hasn't been removed:
 
 - `driftwatch/` package — dead, only reachable from its own tests.
-- `config/settings.yaml` — only read by `driftwatch/settings.py`; also has a stale
-  `gcp.project_id` (`driftwatch-492902`) that doesn't match the real project (`driftwatch2`).
+- `config/settings.yaml` — only read by `driftwatch/settings.py`; `gcp.project_id` now set to `teamfish`.
 - `tests/test_safe_converters.py`, `tests/test_fetch_ohlcv.py`, `tests/test_ohlcv_daily.py`
   — exercise `driftwatch/`, not `sigforge/`. They inflate the "101 tests" count with
   legacy coverage.

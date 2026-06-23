@@ -1,6 +1,6 @@
 # GCP Setup — sigforge 
 
-**Project:** `driftwatch2` (number `852907129360`)
+**Project:** `teamfish`
 **Dataset:** `sigforge_prod` / `sigforge_stage`
 **Target account:** `katyanotkin@gmail.com`
 
@@ -18,7 +18,7 @@ gcloud auth list
 # If it shows kate.middlesex@gmail.com as active, run step 0a first.
 
 gcloud config get-value account   # must print: katyanotkin@gmail.com
-gcloud config get-value project   # must print: driftwatch2
+gcloud config get-value project   # must print: teamfish
 ```
 
 ### 0a. Switch account (if needed)
@@ -30,7 +30,7 @@ gcloud config set account katyanotkin@gmail.com
 ### 0b. Set the project (if needed)
 
 ```bash
-gcloud config set project driftwatch2
+gcloud config set project teamfish
 ```
 
 Confirm both together:
@@ -38,7 +38,7 @@ Confirm both together:
 ```bash
 gcloud config list --format="value(core.account, core.project)"
 # katyanotkin@gmail.com
-# driftwatch2
+# teamfish
 ```
 
 ---
@@ -65,7 +65,7 @@ gcloud services enable \
   secretmanager.googleapis.com \
   cloudbuild.googleapis.com \
   containerregistry.googleapis.com \
-  --project=driftwatch2
+  --project=teamfish
 ```
 
 ---
@@ -75,24 +75,24 @@ gcloud services enable \
 ```bash
 gcloud iam service-accounts create sigforge-sa \
   --display-name="sigforge Service Account" \
-  --project=driftwatch2
+  --project=teamfish
 
-SA=sigforge-sa@driftwatch2.iam.gserviceaccount.com
+SA=sigforge-sa@teamfish.iam.gserviceaccount.com
 
-gcloud projects add-iam-policy-binding driftwatch2 \
+gcloud projects add-iam-policy-binding teamfish \
   --member="serviceAccount:$SA" --role="roles/bigquery.dataEditor" --quiet
-gcloud projects add-iam-policy-binding driftwatch2 \
+gcloud projects add-iam-policy-binding teamfish \
   --member="serviceAccount:$SA" --role="roles/bigquery.jobUser" --quiet
-gcloud projects add-iam-policy-binding driftwatch2 \
+gcloud projects add-iam-policy-binding teamfish \
   --member="serviceAccount:$SA" --role="roles/secretmanager.secretAccessor" --quiet
-gcloud projects add-iam-policy-binding driftwatch2 \
+gcloud projects add-iam-policy-binding teamfish \
   --member="serviceAccount:$SA" --role="roles/run.invoker" --quiet
 ```
 
 Or use the Makefile shortcut (runs all of the above):
 
 ```bash
-make gcp-sa PROJECT=driftwatch2
+make gcp-sa PROJECT=teamfish
 ```
 
 ---
@@ -102,7 +102,7 @@ make gcp-sa PROJECT=driftwatch2
 ```bash
 echo -n "$ANTHROPIC_API_KEY" | gcloud secrets create anthropic-api-key \
   --data-file=- \
-  --project=driftwatch2
+  --project=teamfish
 ```
 
 To update the key later:
@@ -110,7 +110,7 @@ To update the key later:
 ```bash
 echo -n "$ANTHROPIC_API_KEY" | gcloud secrets versions add anthropic-api-key \
   --data-file=- \
-  --project=driftwatch2
+  --project=teamfish
 ```
 
 ---
@@ -119,13 +119,13 @@ echo -n "$ANTHROPIC_API_KEY" | gcloud secrets versions add anthropic-api-key \
 
 ```bash
 # Production dataset
-make bq-init PROJECT=driftwatch2 ENV=prod
+make bq-init PROJECT=teamfish ENV=prod
 
 # Staging dataset (optional but recommended for testing)
-make bq-init PROJECT=driftwatch2 ENV=stage
+make bq-init PROJECT=teamfish ENV=stage
 ```
 
-This creates `driftwatch2.sigforge_prod` and `driftwatch2.sigforge_stage`
+This creates `teamfish.sigforge_prod` and `teamfish.sigforge_stage`
 with tables: `ticker_daily`, `ticker_profile`, `ticker_features`, `ticker_events`.
 
 ---
@@ -135,11 +135,11 @@ with tables: `ticker_daily`, `ticker_profile`, `ticker_features`, `ticker_events
 ```bash
 # Verify .env is correct
 cat .env
-# GCP_PROJECT=driftwatch2
+# GCP_PROJECT=teamfish
 # DW_ENV=prod
 # ANTHROPIC_API_KEY=<your key>
 
-make run-daily  ENV=prod PROJECT=driftwatch2
+make run-daily  ENV=prod PROJECT=teamfish
 ```
 
 ---
@@ -149,11 +149,11 @@ make run-daily  ENV=prod PROJECT=driftwatch2
 ```bash
 # Verify account before pushing
 gcloud config get-value account   # must be katyanotkin@gmail.com
-gcloud config get-value project   # must be driftwatch2
+gcloud config get-value project   # must be teamfish
 
-make docker-build PROJECT=driftwatch2
-make docker-push  PROJECT=driftwatch2
-# Image: gcr.io/driftwatch2/sigforge:latest
+make docker-build PROJECT=teamfish
+make docker-push  PROJECT=teamfish
+# Image: gcr.io/teamfish/sigforge:latest
 ```
 
 ---
@@ -161,14 +161,14 @@ make docker-push  PROJECT=driftwatch2
 ## 8. Deploy Cloud Run Jobs
 
 ```bash
-make deploy-daily   PROJECT=driftwatch2 ENV=prod REGION=us-central1
-make deploy-profile PROJECT=driftwatch2 ENV=prod REGION=us-central1
+make deploy-daily   PROJECT=teamfish ENV=prod REGION=us-central1
+make deploy-profile PROJECT=teamfish ENV=prod REGION=us-central1
 ```
 
 Or both at once:
 
 ```bash
-make deploy-all PROJECT=driftwatch2 ENV=prod REGION=us-central1
+make deploy-all PROJECT=teamfish ENV=prod REGION=us-central1
 ```
 
 ---
@@ -176,10 +176,10 @@ make deploy-all PROJECT=driftwatch2 ENV=prod REGION=us-central1
 ## 9. Create Cloud Scheduler triggers
 
 ```bash
-make scheduler-daily   PROJECT=driftwatch2 ENV=prod REGION=us-central1
+make scheduler-daily   PROJECT=teamfish ENV=prod REGION=us-central1
 # → runs weekdays at 22:00 UTC
 
-make scheduler-profile PROJECT=driftwatch2 ENV=prod REGION=us-central1
+make scheduler-profile PROJECT=teamfish ENV=prod REGION=us-central1
 # → runs Sundays at 23:00 UTC (~6-week cadence managed separately)
 ```
 
@@ -190,7 +190,7 @@ make scheduler-profile PROJECT=driftwatch2 ENV=prod REGION=us-central1
 ```bash
 # Write to BigQuery
 make backfill-local START=2025-01-01 END=2025-03-31 \
-  PROJECT=driftwatch2 ENV=prod
+  PROJECT=teamfish ENV=prod
 
 # Inspect locally first (CSV, no BQ write)
 make backfill-local START=2025-01-01 END=2025-01-31 \
@@ -207,5 +207,5 @@ make backfill-local START=2025-01-01 END=2025-01-31 \
 | Active project | `gcloud config get-value project` |
 | All credentialed accounts | `gcloud auth list` |
 | ADC account | `gcloud auth application-default print-access-token \| head -1` |
-| BQ dataset exists | `bq ls --project_id=driftwatch2` |
-| Cloud Run jobs | `gcloud run jobs list --project=driftwatch2 --region=us-central1` |
+| BQ dataset exists | `bq ls --project_id=teamfish` |
+| Cloud Run jobs | `gcloud run jobs list --project=teamfish --region=us-central1` |
