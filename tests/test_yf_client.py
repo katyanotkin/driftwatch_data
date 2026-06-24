@@ -1,4 +1,4 @@
-"""Tests for sigforge.yf_client — all yfinance calls are mocked."""
+"""Tests for teamfish.yf_client — all yfinance calls are mocked."""
 from __future__ import annotations
 
 import datetime
@@ -6,7 +6,7 @@ import datetime
 import numpy as np
 import pandas as pd
 
-from sigforge.yf_client import _extract_symbol
+from teamfish.yf_client import _extract_symbol
 
 
 def _flat_df(n: int = 10) -> pd.DataFrame:
@@ -66,7 +66,7 @@ class TestExtractSymbol:
 class TestCsvColumns:
     def test_raw_bar_csv_columns_match_model(self):
         """CSV fieldnames must match RawBar model fields minus excluded metadata."""
-        from sigforge.models import RawBar
+        from teamfish.models import RawBar
         exclude = {"ingested_at", "data_source"}
         expected = [f for f in RawBar.model_fields if f not in exclude]
         bar = RawBar(symbol="AAPL", trade_date=datetime.date(2025, 1, 1))
@@ -74,7 +74,7 @@ class TestCsvColumns:
 
     def test_feature_row_csv_columns_match_model(self):
         """CSV fieldnames must match FeatureRow model fields minus excluded metadata."""
-        from sigforge.models import FeatureRow
+        from teamfish.models import FeatureRow
         exclude = {"ingested_at", "run_id"}
         expected = [f for f in FeatureRow.model_fields if f not in exclude]
         row = FeatureRow(

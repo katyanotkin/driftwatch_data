@@ -59,7 +59,7 @@ install:
 	$(PIP) install -r requirements.txt
 
 lint:
-	$(PYTHON) -m ruff check sigforge/ jobs/ tests/
+	$(PYTHON) -m ruff check teamfish/ jobs/ tests/
 
 test:
 	$(PYTHON) -m pytest tests/ -v
@@ -147,7 +147,7 @@ gcp-sa:
 bq-init:
 	@echo ">>> Initialising BQ tables for ENV=$(ENV) in project $(PROJECT) ..."
 	PYTHONPATH=. DW_ENV=$(ENV) GCP_PROJECT=$(PROJECT) $(PYTHON) -c \
-	  "from sigforge.bq_client import BQClient; c = BQClient(); c.ensure_tables(); \
+	  "from teamfish.bq_client import BQClient; c = BQClient(); c.ensure_tables(); \
 	   print('BQ tables ready:', c.dataset_ref)"
 
 # ---------------------------------------------------------------------------

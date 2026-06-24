@@ -7,8 +7,8 @@ from typing import Type
 from google.api_core.exceptions import NotFound
 from google.cloud import bigquery
 
-from sigforge.models import EventRow, FeatureRow, ProfileRow, RawBar
-from sigforge.settings import settings
+from teamfish.models import EventRow, FeatureRow, ProfileRow, RawBar
+from teamfish.settings import settings
 
 log = logging.getLogger(__name__)
 

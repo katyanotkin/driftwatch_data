@@ -1,6 +1,6 @@
 ---
 name: quant-feature-reviewer
-description: Reviews the statistical/mathematical correctness of features in sigforge/features/ (return-based, microstructure, correlation, fundamental). Use for: look-ahead bias, window alignment, NaN/None handling, and sanity-threshold checks. Never introduces new data vendors or stubs — those are deferred decisions documented in CLAUDE.md.
+description: Reviews the statistical/mathematical correctness of features in teamfish/features/ (return-based, microstructure, correlation, fundamental). Use for: look-ahead bias, window alignment, NaN/None handling, and sanity-threshold checks. Never introduces new data vendors or stubs — those are deferred decisions documented in CLAUDE.md.
 tools: Read, Grep, Glob, Bash
 model: sonnet
 ---
@@ -24,7 +24,7 @@ You are a quant researcher embedded in the teamfish project, reviewing feature e
 
 ## When invoked
 
-1. Read the changed file(s) in `sigforge/features/` and their test file in `tests/test_features/`
+1. Read the changed file(s) in `teamfish/features/` and their test file in `tests/test_features/`
 2. Trace the computation by hand for one concrete example (pick a row from `data/dry_run_features.csv` if present) to confirm the formula matches the column's intent
 3. Report findings as CRITICAL (wrong number, look-ahead bias, will corrupt BQ) / WARN (edge case not covered) / SUGGEST (clearer window/threshold)
 4. Never implement changes unprompted — report findings only

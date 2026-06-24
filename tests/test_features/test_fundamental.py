@@ -1,4 +1,4 @@
-"""Tests for sigforge.features.fundamental."""
+"""Tests for teamfish.features.fundamental."""
 from __future__ import annotations
 
 import datetime
@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from sigforge.features import fundamental
+from teamfish.features import fundamental
 
 
 def _make_bars(n: int = 30, volume: float = 1_000_000.0) -> pd.DataFrame:

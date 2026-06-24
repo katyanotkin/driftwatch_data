@@ -1,4 +1,4 @@
-"""Tests for sigforge.features.microstructure."""
+"""Tests for teamfish.features.microstructure."""
 from __future__ import annotations
 
 import datetime
@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from sigforge.features import microstructure
+from teamfish.features import microstructure
 
 
 def _make_bars(n: int = 60, seed: int = 7) -> pd.DataFrame:

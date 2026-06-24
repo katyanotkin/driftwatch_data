@@ -13,14 +13,14 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(name)s %(message)s",
 )
-log = logging.getLogger("sigforge.profile")
+log = logging.getLogger("teamfish.profile")
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from sigforge.bq_client import BQClient
-from sigforge.models import EventRow
-from sigforge.settings import load_symbols, load_tickers
-from sigforge.yf_client import clear_cache, fetch_profile
+from teamfish.bq_client import BQClient
+from teamfish.models import EventRow
+from teamfish.settings import load_symbols, load_tickers
+from teamfish.yf_client import clear_cache, fetch_profile
 
 _GICS_FIELDS = (
     "gics_sector",
@@ -33,7 +33,7 @@ _GICS_FIELDS = (
 def main() -> int:
     snapshot_date = datetime.date.today()
     run_id = str(uuid.uuid4())
-    log.info("=== sigforge profile run | date=%s run_id=%s ===", snapshot_date, run_id)
+    log.info("=== teamfish profile run | date=%s run_id=%s ===", snapshot_date, run_id)
 
     symbols = load_tickers()
     if not symbols:
@@ -94,7 +94,7 @@ def main() -> int:
         log.info("Events: %d gics_reclassification events written", len(events))
 
     clear_cache()
-    log.info("=== sigforge profile run complete ===")
+    log.info("=== teamfish profile run complete ===")
     return 0
 
 

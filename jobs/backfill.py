@@ -13,16 +13,16 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(name)s %(message)s",
 )
-log = logging.getLogger("sigforge.backfill")
+log = logging.getLogger("teamfish.backfill")
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from sigforge.bq_client import BQClient
-from sigforge.features import pipeline as feat_pipeline
-from sigforge.models import FeatureRow, RawBar
-from sigforge.settings import get_sector_map, load_tickers, settings
-from sigforge.utils import safe_float, safe_int
-from sigforge.yf_client import clear_cache, get_history, get_info
+from teamfish.bq_client import BQClient
+from teamfish.features import pipeline as feat_pipeline
+from teamfish.models import FeatureRow, RawBar
+from teamfish.settings import get_sector_map, load_tickers, settings
+from teamfish.utils import safe_float, safe_int
+from teamfish.yf_client import clear_cache, get_history, get_info
 
 _DAILY_EXCLUDE = {"ingested_at", "data_source"}
 _DAILY_FIELDS = [f for f in RawBar.model_fields if f not in _DAILY_EXCLUDE]
@@ -35,7 +35,7 @@ def parse_args() -> argparse.Namespace:
     yesterday = datetime.date.today() - datetime.timedelta(days=1)
     default_start = yesterday - datetime.timedelta(days=30)
 
-    p = argparse.ArgumentParser(description="Backfill sigforge OHLCV + features.")
+    p = argparse.ArgumentParser(description="Backfill teamfish OHLCV + features.")
     p.add_argument("--start", dest="start_date", type=datetime.date.fromisoformat,
                    default=default_start, metavar="YYYY-MM-DD")
     p.add_argument("--end", dest="end_date", type=datetime.date.fromisoformat,

@@ -8,8 +8,8 @@ import uuid
 
 import pandas as pd
 
-from sigforge.features import correlation, fundamental, microstructure, return_based
-from sigforge.models import FeatureRow, PipelineResult
+from teamfish.features import correlation, fundamental, microstructure, return_based
+from teamfish.models import FeatureRow, PipelineResult
 
 log = logging.getLogger(__name__)
 

@@ -12,21 +12,21 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(name)s %(message)s",
 )
-log = logging.getLogger("sigforge.daily")
+log = logging.getLogger("teamfish.daily")
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from sigforge.bq_client import BQClient
-from sigforge.features import pipeline as feat_pipeline
-from sigforge.settings import get_sector_map, load_tickers, settings
-from sigforge.yf_client import clear_cache, fetch_daily_batch, get_history, get_info
+from teamfish.bq_client import BQClient
+from teamfish.features import pipeline as feat_pipeline
+from teamfish.settings import get_sector_map, load_tickers, settings
+from teamfish.yf_client import clear_cache, fetch_daily_batch, get_history, get_info
 
 
 def main() -> int:
     trade_date = datetime.date.today()
     run_id = str(uuid.uuid4())
 
-    log.info("=== sigforge daily run | date=%s run_id=%s ===", trade_date, run_id)
+    log.info("=== teamfish daily run | date=%s run_id=%s ===", trade_date, run_id)
 
     symbols = load_tickers()
     if not symbols:
@@ -77,7 +77,7 @@ def main() -> int:
         log.warning("No feature rows produced")
 
     clear_cache()
-    log.info("=== sigforge daily run complete ===")
+    log.info("=== teamfish daily run complete ===")
     return 1 if feat_result.has_critical_errors else 0
 
 

@@ -25,13 +25,13 @@ computes ML-ready behavioral features, detects structural events, stores in BigQ
 - Upserts are idempotent: re-running the same date must not duplicate rows
 
 ## Project layout
-- `sigforge/` — Python package (settings, models, yf_client, bq_client, features/)
+- `teamfish/` — Python package (settings, models, yf_client, bq_client, features/)
 - `config/symbols.yaml` — stock universe with full GICS classification
 - `jobs/` — run_daily.py, run_profile.py, backfill.py, add_note.py
 - `tests/test_features/` — one file per feature module
 - `deploy/Dockerfile` — python:3.12-slim, non-root user
 - `driftwatch/`, `config/settings.yaml` — **legacy**, pre-sigforge ETF pipeline. Nothing
-  in `jobs/` or `sigforge/` imports from `driftwatch/`. Kept alive only by 3 tests
+  in `jobs/` or `teamfish/` imports from `driftwatch/`. Kept alive only by 3 tests
   (`test_safe_converters.py`, `test_fetch_ohlcv.py`, `test_ohlcv_daily.py`) that exercise
   the old code directly. Flagged for removal in README-next-steps.md; not deleted yet.
 
@@ -41,7 +41,7 @@ computes ML-ready behavioral features, detects structural events, stores in BigQ
 - `ticker_features` — upsert on (symbol, feature_date), wide table, all feature columns
 - `ticker_events`   — upsert on event_id
 
-## Feature modules (sigforge/features/)
+## Feature modules (teamfish/features/)
 - `return_based.py`   — rb_* prefix, 63-day window, OLS vs SPY, drawdown, autocorr
 - `microstructure.py` — ms_* prefix, 21-day Amihud, realized vol, volume ratio, HL range
 - `correlation.py`    — cr_* prefix, 63-day peer correlation, Mahalanobis, lead-lag
@@ -61,7 +61,7 @@ computes ML-ready behavioral features, detects structural events, stores in BigQ
 ## Environment
 - `.env` file: GCP_PROJECT, DW_ENV, ANTHROPIC_API_KEY
 - `config/symbols.yaml`: stocks with ticker, name, and full GICS classification
-- `sigforge/settings.py`: pydantic-settings, validates on startup, exposes load_tickers()
+- `teamfish/settings.py`: pydantic-settings, validates on startup, exposes load_tickers()
 - `ANTHROPIC_API_KEY` / `claude_model` / `claude_max_tokens` are defined on `Settings` but
   **unused by any teamfish code path** — no module calls the Claude API. (`run_profile.py`'s
   `source="claude_auto"` on GICS-reclassification events is a string label, not a live call.)

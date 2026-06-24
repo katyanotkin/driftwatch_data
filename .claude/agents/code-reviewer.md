@@ -1,6 +1,6 @@
 ---
 name: code-reviewer
-description: Reviews code for quality, security, and performance. Invoke after writing or modifying any code in sigforge/ or jobs/. Checks BQ query safety, secret handling, and partial-failure policy adherence.
+description: Reviews code for quality, security, and performance. Invoke after writing or modifying any code in teamfish/ or jobs/. Checks BQ query safety, secret handling, and partial-failure policy adherence.
 tools: Read, Grep, Glob, Bash, WebFetch
 model: sonnet
 ---
@@ -16,6 +16,6 @@ When invoked:
    - **No hardcoded field lists** — CSV/BQ schema must be derived from pydantic model fields, not hand-maintained lists that can drift
    - Performance: unnecessary per-symbol network calls, O(n²) loops over the symbol universe, redundant yfinance fetches
    - Naming, readability, dead code
-3. Where relevant, check BQ schema or query changes against `sigforge/bq_client.py` and the table upsert keys documented in CLAUDE.md
+3. Where relevant, check BQ schema or query changes against `teamfish/bq_client.py` and the table upsert keys documented in CLAUDE.md
 4. Give concrete, prioritized feedback: CRITICAL / WARN / SUGGEST
 5. Never rewrite code unprompted — report findings only

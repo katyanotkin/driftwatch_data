@@ -1,4 +1,4 @@
-"""Tests for sigforge.features.return_based."""
+"""Tests for teamfish.features.return_based."""
 from __future__ import annotations
 
 import datetime
@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from sigforge.features import return_based
+from teamfish.features import return_based
 
 
 def _make_bars(n: int = 100, seed: int = 42) -> pd.DataFrame:

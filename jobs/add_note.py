@@ -17,12 +17,12 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(name)s %(message)s",
 )
-log = logging.getLogger("sigforge.add_note")
+log = logging.getLogger("teamfish.add_note")
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from sigforge.bq_client import BQClient
-from sigforge.models import EventRow
+from teamfish.bq_client import BQClient
+from teamfish.models import EventRow
 
 _NAMESPACE = uuid.UUID("b7e2a1c0-d4f5-4e6b-8a3c-1f2e9d0b5c7a")
 

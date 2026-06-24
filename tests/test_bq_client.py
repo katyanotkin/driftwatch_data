@@ -1,4 +1,4 @@
-"""Tests for sigforge.bq_client — all BigQuery calls are mocked."""
+"""Tests for teamfish.bq_client — all BigQuery calls are mocked."""
 from __future__ import annotations
 
 import datetime
@@ -6,21 +6,21 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from sigforge.models import EventRow, FeatureRow, ProfileRow, RawBar
+from teamfish.models import EventRow, FeatureRow, ProfileRow, RawBar
 
 
 @pytest.fixture()
 def mock_bq_client():
     """Return a BQClient with the google.cloud.bigquery.Client patched out."""
-    with patch("sigforge.bq_client.bigquery.Client") as mock_cls:
+    with patch("teamfish.bq_client.bigquery.Client") as mock_cls:
         mock_instance = MagicMock()
         mock_cls.return_value = mock_instance
         # Avoid importing settings at module level triggering env reads
-        with patch("sigforge.bq_client.settings") as mock_settings:
+        with patch("teamfish.bq_client.settings") as mock_settings:
             mock_settings.gcp_project_id = "test-project"
-            mock_settings.gcp_dataset_id = "sigforge_test"
+            mock_settings.gcp_dataset_id = "teamfish_test"
             mock_settings.gcp_location = "US"
-            from sigforge.bq_client import BQClient
+            from teamfish.bq_client import BQClient
             client = BQClient()
             client._client = mock_instance
             yield client, mock_instance

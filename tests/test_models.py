@@ -1,11 +1,11 @@
-"""Tests for sigforge.models."""
+"""Tests for teamfish.models."""
 from __future__ import annotations
 
 import datetime
 
 import pytest
 
-from sigforge.models import EventRow, FeatureRow, PipelineResult, ProfileRow, RawBar
+from teamfish.models import EventRow, FeatureRow, PipelineResult, ProfileRow, RawBar
 
 
 class TestRawBar:

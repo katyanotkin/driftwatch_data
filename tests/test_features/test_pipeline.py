@@ -1,4 +1,4 @@
-"""Tests for sigforge.features.pipeline."""
+"""Tests for teamfish.features.pipeline."""
 from __future__ import annotations
 
 import datetime
@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from sigforge.features import pipeline
+from teamfish.features import pipeline
 
 
 def _make_bars(n: int = 120, seed: int = 0) -> pd.DataFrame:
@@ -76,7 +76,7 @@ class TestPipelineRun:
         def _boom(bars, spy):
             raise ValueError("synthetic failure")
 
-        monkeypatch.setattr("sigforge.features.pipeline.return_based.compute", _boom)
+        monkeypatch.setattr("teamfish.features.pipeline.return_based.compute", _boom)
 
         _, result = pipeline.run(
             symbols=["AAPL"],
@@ -93,7 +93,7 @@ class TestPipelineRun:
         def _boom(bars, spy):
             raise ValueError("synthetic failure")
 
-        monkeypatch.setattr("sigforge.features.pipeline.return_based.compute", _boom)
+        monkeypatch.setattr("teamfish.features.pipeline.return_based.compute", _boom)
 
         rows, _ = pipeline.run(
             symbols=["AAPL"],

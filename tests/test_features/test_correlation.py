@@ -1,4 +1,4 @@
-"""Tests for sigforge.features.correlation."""
+"""Tests for teamfish.features.correlation."""
 from __future__ import annotations
 
 import datetime
@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from sigforge.features import correlation
+from teamfish.features import correlation
 
 
 def _make_bars(n: int = 150, seed: int = 1) -> pd.DataFrame:

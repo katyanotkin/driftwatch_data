@@ -7,8 +7,8 @@ from typing import Optional
 import pandas as pd
 import yfinance as yf
 
-from sigforge.models import ProfileRow, RawBar
-from sigforge.utils import safe_float, safe_int
+from teamfish.models import ProfileRow, RawBar
+from teamfish.utils import safe_float, safe_int
 
 log = logging.getLogger(__name__)
 

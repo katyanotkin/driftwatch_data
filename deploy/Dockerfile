@@ -5,7 +5,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY sigforge/ ./sigforge/
+COPY teamfish/ ./teamfish/
 COPY config/ ./config/
 COPY jobs/ ./jobs/
 

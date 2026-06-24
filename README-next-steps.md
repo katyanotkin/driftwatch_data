@@ -177,15 +177,15 @@ Microstructure stubs in `microstructure.py`:
 
 ## 7. Cleanup backlog (legacy driftwatch, not deleted yet)
 
-The repo still carries the pre-sigforge ETF pipeline. Nothing in `sigforge/` or `jobs/`
+The repo still carries the pre-sigforge ETF pipeline. Nothing in `teamfish/` or `jobs/`
 depends on it, but it hasn't been removed:
 
 - `driftwatch/` package — dead, only reachable from its own tests.
 - `config/settings.yaml` — only read by `driftwatch/settings.py`; `gcp.project_id` now set to `teamfish`.
 - `tests/test_safe_converters.py`, `tests/test_fetch_ohlcv.py`, `tests/test_ohlcv_daily.py`
-  — exercise `driftwatch/`, not `sigforge/`. They inflate the "101 tests" count with
+  — exercise `driftwatch/`, not `teamfish/`. They inflate the "101 tests" count with
   legacy coverage.
-- `ANTHROPIC_API_KEY` / `claude_model` / `claude_max_tokens` on `sigforge/settings.py`'s
+- `ANTHROPIC_API_KEY` / `claude_model` / `claude_max_tokens` on `teamfish/settings.py`'s
   `Settings` — unused by any teamfish code path. `run_profile.py`'s
   `source="claude_auto"` event label is just a string, not a real Claude call.
 
