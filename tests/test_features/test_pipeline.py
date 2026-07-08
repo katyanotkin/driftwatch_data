@@ -126,6 +126,38 @@ class TestPipelineRun:
         )
         assert rows1[0].run_id != rows2[0].run_id
 
+    def test_future_bars_do_not_affect_features(self, raw_bars, spy_bars):
+        """Point-in-time guard: bars after feature_date must not change output.
+
+        Regression test for the backfill look-ahead bug: computing features
+        for an early date from a history extending past it must give the same
+        result as computing from a history that ends on that date.
+        """
+        early_date = datetime.date(2025, 3, 15)
+
+        rows_full, _ = pipeline.run(
+            symbols=_SYMBOLS,
+            feature_date=early_date,
+            raw_bars=raw_bars,
+            spy_bars=spy_bars,
+            info_dict={s: {} for s in _SYMBOLS},
+            sector_map=_SECTOR_MAP,
+        )
+        truncated = {s: df.loc[df.index <= early_date] for s, df in raw_bars.items()}
+        rows_trunc, _ = pipeline.run(
+            symbols=_SYMBOLS,
+            feature_date=early_date,
+            raw_bars=truncated,
+            spy_bars=spy_bars.loc[spy_bars.index <= early_date],
+            info_dict={s: {} for s in _SYMBOLS},
+            sector_map=_SECTOR_MAP,
+        )
+
+        for full, trunc in zip(rows_full, rows_trunc):
+            d_full = full.model_dump(exclude={"run_id", "ingested_at"})
+            d_trunc = trunc.model_dump(exclude={"run_id", "ingested_at"})
+            assert d_full == d_trunc
+
     def test_sanitize_replaces_inf_with_none(self):
         features = {"rb_rolling_beta": float("inf"), "ms_volume_ratio": 1.5}
         clean = pipeline._sanitize(features)

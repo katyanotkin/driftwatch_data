@@ -77,11 +77,16 @@ def main() -> int:
         "csv" if args.out_csv else "bq",
     )
 
-    # Pre-fetch 252-day history for all symbols (shared across all dates)
-    log.info("Pre-fetching history for %d symbols …", len(symbols))
-    raw_bars = {sym: get_history(sym, lookback_days=settings.history_days, end_date=args.end_date)
+    # Pre-fetch history for all symbols (shared across all dates). The pipeline
+    # truncates to each feature_date, so the earliest date in the range still
+    # needs a full history_days window behind it — extend the lookback by the
+    # trading-day span of the backfill.
+    span = sum(1 for _ in trading_days(args.start_date, args.end_date))
+    lookback = settings.history_days + span
+    log.info("Pre-fetching %d-day history for %d symbols …", lookback, len(symbols))
+    raw_bars = {sym: get_history(sym, lookback_days=lookback, end_date=args.end_date)
                 for sym in symbols}
-    spy_bars = get_history("SPY", lookback_days=settings.history_days, end_date=args.end_date)
+    spy_bars = get_history("SPY", lookback_days=lookback, end_date=args.end_date)
     info_dict = {sym: get_info(sym) for sym in symbols}
     sector_map = get_sector_map()
 

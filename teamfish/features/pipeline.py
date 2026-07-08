@@ -54,6 +54,12 @@ def run(
     feature_rows: list[FeatureRow] = []
     run_id = _make_run_id(feature_date)
 
+    # Point-in-time guard: no module may see bars after feature_date. Without
+    # this, a backfill computing many historical dates from one pre-fetched
+    # history would leak future data into every date's features.
+    raw_bars = {sym: _truncate(df, feature_date) for sym, df in raw_bars.items()}
+    spy_bars = _truncate(spy_bars, feature_date)
+
     # Group peers by sector for correlation module
     peers_by_sector: dict[str, dict[str, pd.DataFrame]] = {}
     for sym in symbols:
@@ -129,6 +135,13 @@ def _run_module(
         msg = f"{symbol}: module {module_name} failed: {exc}"
         log.error(msg)
         return {}, msg
+
+
+def _truncate(df: pd.DataFrame, feature_date: datetime.date) -> pd.DataFrame:
+    """Return df restricted to rows with index <= feature_date."""
+    if df.empty:
+        return df
+    return df.loc[df.index <= feature_date]
 
 
 def _sanitize(features: dict) -> dict:
