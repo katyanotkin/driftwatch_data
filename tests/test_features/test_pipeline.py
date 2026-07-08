@@ -27,7 +27,8 @@ def _make_bars(n: int = 120, seed: int = 0) -> pd.DataFrame:
     )
 
 
-_FEATURE_DATE = datetime.date(2025, 5, 1)
+# Last bar date in _make_bars(120): features require a bar on feature_date
+_FEATURE_DATE = datetime.date(2025, 4, 30)
 _SYMBOLS = ["AAPL", "MSFT"]
 _SECTOR_MAP = {"AAPL": "Tech", "MSFT": "Tech"}
 
@@ -125,6 +126,25 @@ class TestPipelineRun:
             sector_map=_SECTOR_MAP,
         )
         assert rows1[0].run_id != rows2[0].run_id
+
+    def test_no_bar_on_feature_date_skips_symbol(self, raw_bars, spy_bars):
+        """A date with no bar (market holiday / symbol gap) must produce no row.
+
+        Regression test for holiday duplicates: emitting a row from a window
+        ending on the previous bar would clone the previous date's features.
+        """
+        holiday = datetime.date(2025, 5, 1)  # after the last bar in the fixture
+        rows, result = pipeline.run(
+            symbols=_SYMBOLS,
+            feature_date=holiday,
+            raw_bars=raw_bars,
+            spy_bars=spy_bars,
+            info_dict={s: {} for s in _SYMBOLS},
+            sector_map=_SECTOR_MAP,
+        )
+        assert rows == []
+        assert result.symbols_skipped == len(_SYMBOLS)
+        assert result.errors == []
 
     def test_future_bars_do_not_affect_features(self, raw_bars, spy_bars):
         """Point-in-time guard: bars after feature_date must not change output.

@@ -78,6 +78,13 @@ def run(
             log.warning("%s: no bars — skipping feature computation", symbol)
             result.add_error(f"{symbol}: no bars")
             continue
+        if feature_date not in bars.index:
+            # Market holiday or symbol-specific gap: no bar on feature_date
+            # means no new information — emitting a row would duplicate the
+            # previous date's features. Normal condition, not an error.
+            log.debug("%s: no bar on %s — skipping", symbol, feature_date)
+            result.symbols_skipped += 1
+            continue
 
         features: dict = {}
         module_errors: list[str] = []

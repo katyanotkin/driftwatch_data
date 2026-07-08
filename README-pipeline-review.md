@@ -102,10 +102,15 @@ GCP ADC credentials at collection time; environmental, unrelated to this change)
   where `trading_days()` yields a weekday with no bar, so the truncated window equals
   the prior day's.
 
-**Known residual wart:** feature rows are still *emitted* for market holidays,
-duplicating the prior day's vector; `ticker_daily` rows are correctly skipped on those
-dates (no bar in the fetched index). Open question whether `pipeline.run` should skip
-feature dates for which the symbol has no bar on `feature_date` itself.
+**Holiday duplicates — also fixed (2026-07-08):** the initial fix still *emitted*
+feature rows for market holidays, duplicating the prior day's vector (the 4200 vs 3960
+row counts above). `pipeline.run` now skips any symbol with no bar on `feature_date`
+itself — market holiday or symbol-specific gap — counted in
+`PipelineResult.symbols_skipped`, not treated as an error. Feature rows now match daily
+rows 1:1 (3960/3960), and AAPL shows 66 unique vectors across 66 rows. `run_daily.py`
+is unaffected: on a holiday it already exits before feature computation (no OHLCV rows).
+Regression test:
+`tests/test_features/test_pipeline.py::test_no_bar_on_feature_date_skips_symbol`.
 
 ## 5. Remaining known issues / backlog (not yet fixed)
 

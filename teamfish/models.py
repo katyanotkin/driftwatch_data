@@ -189,6 +189,7 @@ class EventRow(BaseModel):
 
 class PipelineResult(BaseModel):
     symbols_processed: int = 0
+    symbols_skipped: int = 0   # no bar on feature_date (holiday / symbol gap)
     rows_written: int = 0
     errors: list[str] = Field(default_factory=list)
 
