@@ -81,3 +81,42 @@ class TestCsvColumns:
             symbol="AAPL", feature_date=datetime.date(2025, 1, 1), run_id="r"
         )
         assert list(row.to_csv_dict().keys()) == expected
+
+
+class TestHistoryCacheKey:
+    def test_cache_distinguishes_fetch_arguments(self, monkeypatch):
+        """Cache is keyed by (symbol, lookback_days, end_date) — a second call
+        with a different end_date must trigger a fresh fetch, not return the
+        previously cached window (regression for symbol-only cache key)."""
+        from teamfish import yf_client
+
+        calls: list[tuple[str, str]] = []
+
+        class FakeTicker:
+            def __init__(self, symbol: str):
+                self.symbol = symbol
+
+            def history(self, start, end, auto_adjust, actions):
+                calls.append((self.symbol, end))
+                n = 30
+                dates = pd.date_range(end=pd.Timestamp(end) - pd.Timedelta(days=1), periods=n)
+                close = np.linspace(100.0, 110.0, n)
+                return pd.DataFrame(
+                    {"Open": close, "High": close, "Low": close, "Close": close,
+                     "Volume": 1e6, "Dividends": 0.0, "Stock Splits": 0.0},
+                    index=dates,
+                )
+
+        monkeypatch.setattr(yf_client.yf, "Ticker", FakeTicker)
+        yf_client.clear_cache()
+
+        d1 = yf_client.get_history("AAPL", lookback_days=10, end_date=datetime.date(2025, 3, 1))
+        d2 = yf_client.get_history("AAPL", lookback_days=10, end_date=datetime.date(2025, 6, 1))
+        assert len(calls) == 2
+        assert d1.index[-1] != d2.index[-1]
+
+        # Identical arguments are served from cache — no third fetch
+        yf_client.get_history("AAPL", lookback_days=10, end_date=datetime.date(2025, 3, 1))
+        assert len(calls) == 2
+
+        yf_client.clear_cache()

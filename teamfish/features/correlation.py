@@ -37,26 +37,34 @@ def compute(
     if len(stock_ret) < MIN_OBS:
         return result
 
-    # Build peer return matrix aligned with stock
+    # Build peer return matrix; require each peer to overlap the stock's
+    # return dates on at least MIN_OBS days
     peer_rets: dict[str, pd.Series] = {}
     for peer_sym, peer_df in peer_bars.items():
         if peer_sym == symbol or peer_df.empty or "Close" not in peer_df.columns:
             continue
         pr = peer_df["Close"].pct_change().dropna()
-        if len(pr) >= MIN_OBS:
+        if pr.index.intersection(stock_ret.index).size >= MIN_OBS:
             peer_rets[peer_sym] = pr
 
     if len(peer_rets) < MIN_PEERS:
         return result
 
-    # Align all series on common dates
-    all_rets = pd.DataFrame({"_stock": stock_ret, **peer_rets}).dropna()
+    # Align on the stock's dates only — no joint dropna, so one gappy peer
+    # cannot shrink the sample for the whole sector. Downstream statistics
+    # (corrwith, cov, mean, median) are pairwise-complete / NaN-aware.
+    all_rets = pd.DataFrame({"_stock": stock_ret, **peer_rets})
+    all_rets = all_rets.loc[all_rets["_stock"].notna()]
     if len(all_rets) < MIN_OBS:
         return result
 
     recent = all_rets.tail(CORR_WINDOW)
     stock_recent = recent["_stock"]
     peers_recent = recent.drop(columns=["_stock"])
+    # Within the window, keep peers with enough overlap to estimate a corr
+    peers_recent = peers_recent.loc[:, peers_recent.notna().sum() >= MIN_OBS]
+    if peers_recent.shape[1] < MIN_PEERS:
+        return result
 
     # Rolling peer correlation: mean Pearson correlation with sector peers
     corrs = peers_recent.corrwith(stock_recent)
@@ -72,14 +80,19 @@ def compute(
     # Correlation breakdown score (Mahalanobis distance)
     hist = all_rets.tail(HIST_WINDOW)
     peer_hist = hist.drop(columns=["_stock"])
-    if len(peer_hist) >= MAHAL_OBS * 2:
+    # Peers need coverage across the covariance window as well
+    peer_hist = peer_hist.loc[:, peer_hist.notna().sum() >= MAHAL_OBS * 2]
+    if len(peer_hist) >= MAHAL_OBS * 2 and peer_hist.shape[1] >= MIN_PEERS:
         obs_window = peer_hist.tail(MAHAL_OBS).mean() - peer_hist.mean()
-        cov = peer_hist.cov()
+        cov = peer_hist.cov()   # pairwise-complete
         try:
             cov_inv = np.linalg.pinv(cov.values)
-            v = obs_window.values
-            mahal_sq = float(v @ cov_inv @ v)
-            result["cr_correlation_breakdown_score"] = float(max(0.0, mahal_sq) ** 0.5)
+            v = obs_window.values.astype(float)
+            # Pairwise cov + gappy means can yield NaN — refuse rather than
+            # let max(0.0, nan) silently clamp to 0
+            if np.all(np.isfinite(v)) and np.all(np.isfinite(cov_inv)):
+                mahal_sq = float(v @ cov_inv @ v)
+                result["cr_correlation_breakdown_score"] = float(max(0.0, mahal_sq) ** 0.5)
         except Exception as exc:
             log.debug("%s: Mahalanobis failed: %s", symbol, exc)
 

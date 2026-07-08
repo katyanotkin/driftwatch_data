@@ -5,7 +5,7 @@ Reference for every column in `ticker_features`. The authoritative column list i
 the `compute()` functions in [`teamfish/features/`](teamfish/features/). If this doc
 and the code disagree, the code wins — update this doc.
 
-Known correctness caveats (fundamentals timestamping, peer alignment) are tracked in
+Known correctness caveats (fundamentals timestamping) are tracked in
 [README-pipeline-review.md](README-pipeline-review.md) and noted inline below.
 
 ## Row key
@@ -85,11 +85,13 @@ have < 5 rows. Data source: the symbol's own yfinance adjusted daily bars only.
 `CORR_WINDOW = 63`, `HIST_WINDOW = 252`, `MAHAL_OBS = 21`, `MIN_PEERS = 2`,
 `MIN_OBS = 20`. Peers = other universe symbols in the same GICS sector
 (`config/symbols.yaml` via `get_sector_map()`; membership is current-state, not
-point-in-time). All peer return series are aligned by joint `dropna()` — one gappy
-peer shrinks the sample for the whole sector (review doc §5.4). All `cr_*` are `None`
-if the stock has < 20 returns, fewer than 2 peers each with ≥ 20 returns, or < 20
-jointly aligned observations. Data source: yfinance adjusted daily bars for the
-symbol + sector peers.
+point-in-time). Peer series are aligned on the stock's return dates with NaN-aware
+pairwise statistics — a gappy peer is excluded per computation rather than shrinking
+the sector sample. Gates: a peer needs ≥ 20 obs overlapping the stock overall,
+≥ 20 obs inside the 63d window (correlation/centroid/median), and ≥ 42 obs inside
+the 252d window (Mahalanobis). All `cr_*` are `None` if the stock has < 20 returns
+or fewer than 2 peers pass the gates. Data source: yfinance adjusted daily bars for
+the symbol + sector peers.
 
 Let $c_t$ = equal-weight mean of peer returns (sector centroid) over the 63d window.
 

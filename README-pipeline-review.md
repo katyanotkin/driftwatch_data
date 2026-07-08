@@ -124,14 +124,18 @@ In priority order:
    fundamentals. Options: null out `fu_*` in backfill runs, or document the columns as
    as-of-run-date. Same issue in principle for `cr_*` sector membership
    (`get_sector_map()` is current-state), but GICS churn is slow enough to ignore.
-3. **`yf_client._history_cache` keyed by symbol only**, ignoring `end_date` and
-   `lookback_days` — a second `get_history` call in the same process with different
-   args silently returns the first call's window. Key by
-   `(symbol, end_date, lookback_days)`.
-4. **`correlation.py` joint `dropna()` over the whole sector.** One peer with a
-   short/gappy history shrinks the aligned sample for the entire sector, potentially
-   below `MIN_OBS`. Drop peers with insufficient overlap before aligning, or compute
-   pairwise.
+3. ~~**`yf_client._history_cache` keyed by symbol only**~~ **FIXED (2026-07-08)**:
+   cache is now keyed by `(symbol, lookback_days, end_date)`
+   (`test_cache_distinguishes_fetch_arguments`).
+4. ~~**`correlation.py` joint `dropna()` over the whole sector.**~~ **FIXED
+   (2026-07-08)**: alignment is now on the stock's return dates only, with
+   NaN-aware pairwise statistics downstream (`corrwith`/`cov`/`mean`/`median`).
+   Peers are gated per computation: ≥ 20 obs overlapping the stock overall,
+   ≥ 20 obs inside the 63d correlation window, ≥ 42 obs inside the 252d
+   Mahalanobis window; a NaN observation vector or covariance now refuses to
+   emit a score instead of silently clamping to 0
+   (`test_stale_peer_does_not_distort_window`). For gap-free histories the
+   values are identical to the joint-dropna implementation.
 5. ~~**`ms_volume_ratio` includes today in its own denominator**~~ **FIXED
    (2026-07-08)**: the 30-day average now excludes today
    (`test_volume_ratio_excludes_today_from_average`). `avg_volume_30d` in

@@ -100,3 +100,22 @@ class TestCorrelation:
         c = result.get("cr_rolling_peer_correlation")
         if c is not None:
             assert -1.0 <= c <= 1.0
+
+
+class TestPeerAlignment:
+    def test_stale_peer_does_not_distort_window(self, bars, peers):
+        """A peer whose history ends months ago must be excluded from the
+        window, not drag the jointly aligned sample back in time (regression
+        for the joint dropna across all peers)."""
+        baseline = correlation.compute("TARGET", bars, peers)
+
+        stale = _make_bars(n=150, seed=4).iloc[:30]  # only the first 30 dates
+        result = correlation.compute("TARGET", bars, {**peers, "STALE": stale})
+
+        for key in (
+            "cr_rolling_peer_correlation",
+            "cr_peer_return_deviation",
+            "cr_correlation_breakdown_score",
+            "cr_lead_lag_score",
+        ):
+            assert result[key] == pytest.approx(baseline[key]), key

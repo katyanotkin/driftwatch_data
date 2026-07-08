@@ -12,8 +12,10 @@ from teamfish.utils import safe_float, safe_int
 
 log = logging.getLogger(__name__)
 
-# In-memory cache per run — never re-fetch the same ticker twice
-_history_cache: dict[str, pd.DataFrame] = {}
+# In-memory cache per run — never re-fetch the same request twice.
+# History is keyed by (symbol, lookback_days, end_date): a symbol-only key
+# would silently return a window fetched for different arguments.
+_history_cache: dict[tuple[str, int, datetime.date], pd.DataFrame] = {}
 _info_cache: dict[str, dict] = {}
 
 
@@ -28,10 +30,11 @@ def get_history(
     Columns: Open High Low Close Volume Dividends Stock Splits (auto_adjust=True).
     Close is the split-and-dividend-adjusted price.
     """
-    if symbol in _history_cache:
-        return _history_cache[symbol]
-
     end = end_date or datetime.date.today()
+    cache_key = (symbol, lookback_days, end)
+    if cache_key in _history_cache:
+        return _history_cache[cache_key]
+
     # Fetch extra calendar days to account for weekends/holidays
     start = end - datetime.timedelta(days=int(lookback_days * 1.6))
 
@@ -44,17 +47,17 @@ def get_history(
         )
         if df.empty:
             log.warning("%s: empty history", symbol)
-            _history_cache[symbol] = pd.DataFrame()
+            _history_cache[cache_key] = pd.DataFrame()
             return pd.DataFrame()
 
         df.index = pd.to_datetime(df.index).date
         df = df.sort_index().tail(lookback_days)
-        _history_cache[symbol] = df
+        _history_cache[cache_key] = df
         return df
 
     except Exception as exc:
         log.error("%s: history fetch failed: %s", symbol, exc)
-        _history_cache[symbol] = pd.DataFrame()
+        _history_cache[cache_key] = pd.DataFrame()
         return pd.DataFrame()
 
 
