@@ -44,9 +44,10 @@ def compute(bars: pd.DataFrame) -> dict:
             amihud_vals = ret_abs.reindex(valid.index) / valid
             result["ms_amihud_illiquidity"] = float(amihud_vals.mean())
 
-    # Volume ratio: today's volume / avg_volume_30d
-    past_30 = bars.tail(VOLUME_AVG_WINDOW)
-    avg_vol = past_30["Volume"].mean()
+    # Volume ratio: today's volume / trailing 30-day average, excluding today —
+    # including today lets a spike damp its own denominator by ~1/30
+    past_30 = bars["Volume"].iloc[:-1].tail(VOLUME_AVG_WINDOW)
+    avg_vol = past_30.mean() if len(past_30) > 0 else None
     today_vol = bars["Volume"].iloc[-1]
     if avg_vol and avg_vol > 0:
         result["ms_volume_ratio"] = float(today_vol) / float(avg_vol)

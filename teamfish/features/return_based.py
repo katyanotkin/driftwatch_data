@@ -42,15 +42,21 @@ def compute(bars: pd.DataFrame, spy_bars: pd.DataFrame) -> dict:
     s = aligned["stock"].values
     m = aligned["spy"].values
 
-    # OLS: stock = alpha + beta * spy
+    # OLS: stock = alpha + beta * spy (descriptive fit over the full window)
     coef = np.polyfit(m, s, deg=1)   # [beta, alpha]
     beta = float(coef[0])
     alpha = float(coef[1])
     result["rb_rolling_beta"] = beta
     result["rb_rolling_alpha"] = alpha
 
-    # Residual return for the most recent day
-    result["rb_residual_return"] = float(s[-1]) - beta * float(m[-1])
+    # Residual return: out-of-sample surprise on the most recent day.
+    # Fit on the window excluding day t, then residual = actual − predicted,
+    # so day t never influences its own expectation.
+    if len(s) >= MIN_OBS + 1:
+        beta_oos, alpha_oos = np.polyfit(m[:-1], s[:-1], deg=1)
+        result["rb_residual_return"] = float(
+            s[-1] - (alpha_oos + beta_oos * m[-1])
+        )
 
     # Lag-1 autocorrelation of the 63-day return series
     if len(s) >= 2:

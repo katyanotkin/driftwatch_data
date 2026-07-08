@@ -59,6 +59,26 @@ class TestReturnBased:
         result = return_based.compute(bars, spy_bars)
         assert isinstance(result["rb_rolling_beta"], float)
 
+    def test_residual_return_uses_out_of_sample_fit(self, bars, spy_bars):
+        """Perturbing only day t's return must shift the residual one-for-one.
+
+        The prediction is fit on days < t, so a shock on day t cannot be
+        absorbed into its own expectation. With an in-sample fit the beta
+        would shift and the residual change would deviate from the shock.
+        """
+        base = return_based.compute(bars, spy_bars)
+
+        shocked_bars = bars.copy()
+        shocked_bars.iloc[-1, shocked_bars.columns.get_loc("Close")] *= 1.05
+        shocked = return_based.compute(shocked_bars, spy_bars)
+
+        prev_close = bars["Close"].iloc[-2]
+        delta = (
+            shocked_bars["Close"].iloc[-1] / prev_close
+            - bars["Close"].iloc[-1] / prev_close
+        )
+        assert shocked["rb_residual_return"] - base["rb_residual_return"] == pytest.approx(delta)
+
     def test_max_drawdown_nonpositive(self, bars, spy_bars):
         result = return_based.compute(bars, spy_bars)
         assert result["rb_max_drawdown"] <= 0.0

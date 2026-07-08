@@ -132,13 +132,18 @@ In priority order:
    short/gappy history shrinks the aligned sample for the entire sector, potentially
    below `MIN_OBS`. Drop peers with insufficient overlap before aligning, or compute
    pairwise.
-5. **`ms_volume_ratio` includes today in its own denominator** — today's volume is one
-   of the 30 observations in the average, damping spikes by ~1/30. Same pattern in
-   `avg_volume_30d` in both `backfill.py` (`df.index <= trade_date`) and
-   `fetch_daily_batch`.
-6. **`rb_residual_return` beta is in-sample by one day** — the OLS fit window includes
-   day *t*, then the residual is evaluated on day *t*. Fit on *t−63 … t−1*, apply to
-   day *t*.
+5. ~~**`ms_volume_ratio` includes today in its own denominator**~~ **FIXED
+   (2026-07-08)**: the 30-day average now excludes today
+   (`test_volume_ratio_excludes_today_from_average`). `avg_volume_30d` in
+   `backfill.py`/`fetch_daily_batch` intentionally keeps the inclusive trailing
+   average — it is a stored stat, not a spike detector.
+6. ~~**`rb_residual_return` beta is in-sample by one day**~~ **FIXED (2026-07-08)**:
+   α/β for the residual are now fit on *t−63 … t−1* and applied to day *t*
+   (`test_residual_return_uses_out_of_sample_fit`). Semantics also changed from
+   $s_t - \beta m_t$ to the full out-of-sample prediction error
+   $s_t - (\alpha' + \beta' m_t)$ — the residual is now centred (the stock's own
+   drift is subtracted). `rb_rolling_beta`/`rb_rolling_alpha` remain full-window
+   descriptive fits.
 7. **Cheap candidate features** from data already fetched, no new vendor needed:
    21/63/126d momentum, distance from 52-week high, Garman–Klass / Parkinson OHLC
    volatility, volume trend, dollar volume, days since last split/dividend.

@@ -5,8 +5,7 @@ Reference for every column in `ticker_features`. The authoritative column list i
 the `compute()` functions in [`teamfish/features/`](teamfish/features/). If this doc
 and the code disagree, the code wins — update this doc.
 
-Known correctness caveats (in-sample residual beta, volume-ratio denominator,
-fundamentals timestamping) are tracked in
+Known correctness caveats (fundamentals timestamping, peer alignment) are tracked in
 [README-pipeline-review.md](README-pipeline-review.md) and noted inline below.
 
 ## Row key
@@ -61,7 +60,7 @@ OLS is `np.polyfit(m, s, deg=1)`: $s_t = \alpha + \beta\, m_t$.
 |---|---|---|---|
 | `rb_rolling_alpha` | OLS intercept $\alpha$ | 63d | < 20 aligned obs |
 | `rb_rolling_beta` | OLS slope $\beta$ | 63d | < 20 aligned obs |
-| `rb_residual_return` | $s_t - \beta\, m_t$ for the most recent day. Beta fit includes day *t* (in-sample by one day — review doc §5.6) | 63d fit, 1d value | < 20 aligned obs |
+| `rb_residual_return` | $s_t - (\alpha' + \beta'\, m_t)$ for the most recent day, with $\alpha', \beta'$ fit out-of-sample on the window *excluding* day *t* — the shock on day *t* cannot influence its own expectation | 63d fit, 1d value | < 21 aligned obs |
 | `rb_return_autocorr` | Lag-1 autocorrelation of the 63d return series (`pd.Series.autocorr(lag=1)`) | 63d | autocorr computation fails |
 | `rb_rolling_skewness` | `pd.Series.skew()` of 63d returns (Fisher) | 63d | < 20 aligned obs |
 | `rb_rolling_kurtosis` | `pd.Series.kurtosis()` of 63d returns (Fisher, **excess** — normal = 0) | 63d | < 20 aligned obs |
@@ -77,7 +76,7 @@ have < 5 rows. Data source: the symbol's own yfinance adjusted daily bars only.
 | Column | Definition | Window | None when |
 |---|---|---|---|
 | `ms_amihud_illiquidity` | $\text{mean}\left(\frac{\|r_t\|}{C_t V_t}\right)$ over the last 21 bars; zero-dollar-volume days dropped | 21d | < 5 bars in window, or all dollar volumes zero |
-| `ms_volume_ratio` | $V_{\text{today}} / \text{mean}(V, 30\text{d})$. **Today is inside the 30d average** — spikes damped ~1/30 (review doc §5.5) | 30d | 30d avg volume is 0/NaN |
+| `ms_volume_ratio` | $V_{\text{today}} / \text{mean}(V_{t-30} \dots V_{t-1})$ — trailing average excludes today, so a spike cannot damp its own denominator | 30d | prior 30d avg volume is 0/NaN |
 | `ms_realized_volatility` | $\text{std}(\log \frac{C_t}{C_{t-1}}, 21\text{d}) \times \sqrt{252}$ (annualised) | 21d | < 5 log returns in window |
 | `ms_high_low_range` | $(H - L) / C$ for the last bar | 1d | H/L missing or C = 0 |
 

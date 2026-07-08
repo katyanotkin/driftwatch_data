@@ -52,6 +52,16 @@ class TestMicrostructure:
         result = microstructure.compute(bars)
         assert result["ms_volume_ratio"] > 0.0
 
+    def test_volume_ratio_excludes_today_from_average(self):
+        """A volume spike today must not damp its own denominator."""
+        bars = _make_bars(n=40)
+        bars.loc[bars.index[:-1], "Volume"] = 1_000_000.0
+        bars.loc[bars.index[-1], "Volume"] = 10_000_000.0
+        result = microstructure.compute(bars)
+        # Average of the 30 prior days is exactly 1M; if today leaked into the
+        # denominator the ratio would be ~7.69 instead of 10.
+        assert result["ms_volume_ratio"] == pytest.approx(10.0)
+
     def test_realized_vol_positive(self, bars):
         result = microstructure.compute(bars)
         assert result["ms_realized_volatility"] > 0.0

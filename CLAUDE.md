@@ -4,7 +4,7 @@ Feature engineering pipeline for individual stocks. Fetches raw data via yfinanc
 computes ML-ready behavioral features, detects structural events, stores in BigQuery.
 
 ## Status (2026-07-08)
-- Pipeline is feature-complete: 60-symbol universe, 100 tests passing locally (103 incl.
+- Pipeline is feature-complete: 60-symbol universe, 102 tests passing locally (105 incl.
   the 3 legacy BQ tests in test_ohlcv_daily.py that need GCP ADC), dry-run CSVs validated locally.
 - No production BQ write has happened yet — see README-next-steps.md for the first-load checklist.
 - See "Generating data" below for the local workflow (CSV dry run → BQ backfill → daily/profile jobs).
