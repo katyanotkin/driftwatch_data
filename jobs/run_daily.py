@@ -2,7 +2,6 @@
 """Cloud Run Job: OHLCV + features for today."""
 from __future__ import annotations
 
-import datetime
 import logging
 import os
 import sys
@@ -19,11 +18,12 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from teamfish.bq_client import BQClient
 from teamfish.features import pipeline as feat_pipeline
 from teamfish.settings import get_sector_map, load_tickers, settings
+from teamfish.utils import market_today
 from teamfish.yf_client import clear_cache, fetch_daily_batch, get_history, get_info
 
 
 def main() -> int:
-    trade_date = datetime.date.today()
+    trade_date = market_today()
     run_id = str(uuid.uuid4())
 
     log.info("=== teamfish daily run | date=%s run_id=%s ===", trade_date, run_id)

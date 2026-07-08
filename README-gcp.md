@@ -177,10 +177,10 @@ make deploy-all PROJECT=teamfish ENV=prod REGION=us-central1
 
 ```bash
 make scheduler-daily   PROJECT=teamfish ENV=prod REGION=us-central1
-# → runs weekdays at 22:00 UTC
+# → runs weekdays at 22:00 ET (after market close)
 
 make scheduler-profile PROJECT=teamfish ENV=prod REGION=us-central1
-# → runs Sundays at 23:00 UTC (~6-week cadence managed separately)
+# → runs Sundays at 23:00 ET (~6-week cadence managed separately)
 ```
 
 ---

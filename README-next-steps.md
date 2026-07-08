@@ -75,8 +75,8 @@ make deploy-all ENV=prod
 ### Set up Cloud Scheduler triggers
 
 ```bash
-make scheduler-daily ENV=prod    # weekdays 22:00 UTC
-make scheduler-profile ENV=prod  # Sundays 23:00 UTC (≈ 6-week cadence)
+make scheduler-daily ENV=prod    # weekdays 22:00 ET (after market close)
+make scheduler-profile ENV=prod  # Sundays 23:00 ET (≈ 6-week cadence)
 ```
 
 ---

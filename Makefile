@@ -196,6 +196,10 @@ deploy-profile:
 # Cloud Scheduler
 # ---------------------------------------------------------------------------
 
+# Schedules run in US market time (DST-aware) so "after close" stays true
+# year-round. run_daily.py derives trade_date from the same timezone.
+SCHED_TZ ?= America/New_York
+
 _scheduler-job:
 	gcloud scheduler jobs create http $(TRIGGER) \
 	  --schedule="$(SCHEDULE)" \
@@ -203,18 +207,20 @@ _scheduler-job:
 	  --http-method=POST \
 	  --oauth-service-account-email=$(SA) \
 	  --location=$(REGION) \
-	  --time-zone="UTC" \
+	  --time-zone="$(SCHED_TZ)" \
 	  || gcloud scheduler jobs update http $(TRIGGER) \
 	  --schedule="$(SCHEDULE)" \
-	  --location=$(REGION)
+	  --location=$(REGION) \
+	  --time-zone="$(SCHED_TZ)"
 
+# Weekdays at 22:00 ET — six hours after the 16:00 ET close, same trading date
 scheduler-daily:
 	$(MAKE) _scheduler-job \
 	  TRIGGER=$(JOB_DAILY)-trigger \
 	  JOB=$(JOB_DAILY) \
 	  SCHEDULE="0 22 * * 1-5"
 
-# Every 6 weeks on Sunday at 23:00 UTC (schedule approximated as "0 23 * * 0/6")
+# Every 6 weeks on Sunday at 23:00 ET (schedule approximated as "0 23 * * 0/6")
 # Adjust or replace with Cloud Scheduler one-time jobs if exact 6-week cadence is required.
 scheduler-profile:
 	$(MAKE) _scheduler-job \

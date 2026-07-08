@@ -2,7 +2,6 @@
 """Cloud Run Job: profile snapshot + GICS reclassification detection (~every 6 weeks)."""
 from __future__ import annotations
 
-import datetime
 import json
 import logging
 import os
@@ -20,6 +19,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from teamfish.bq_client import BQClient
 from teamfish.models import EventRow
 from teamfish.settings import load_symbols, load_tickers
+from teamfish.utils import market_today
 from teamfish.yf_client import clear_cache, fetch_profile
 
 _GICS_FIELDS = (
@@ -31,7 +31,7 @@ _GICS_FIELDS = (
 
 
 def main() -> int:
-    snapshot_date = datetime.date.today()
+    snapshot_date = market_today()
     run_id = str(uuid.uuid4())
     log.info("=== teamfish profile run | date=%s run_id=%s ===", snapshot_date, run_id)
 
