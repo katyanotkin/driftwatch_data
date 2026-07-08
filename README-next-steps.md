@@ -1,6 +1,7 @@
 # teamfish — next steps
 
-Current state (2026-06-16): pipeline is feature-complete, 101 tests pass, dry-run CSV validated.
+Current state (2026-07-08): pipeline is feature-complete, 102 tests pass (99 without
+the ADC-gated legacy file `tests/test_ohlcv_daily.py`), dry-run CSV validated.
 Schema enrichments (adjusted close, corporate actions, 13 new profile fields, 10 new
 fundamental features) merged. Ready for first production BQ write and Cloud Run deployment.
 No data has been written to BigQuery yet — see section 1 below for the first load.
@@ -183,7 +184,7 @@ depends on it, but it hasn't been removed:
 - `driftwatch/` package — dead, only reachable from its own tests.
 - `config/settings.yaml` — only read by `driftwatch/settings.py`; `gcp.project_id` now set to `teamfish`.
 - `tests/test_safe_converters.py`, `tests/test_fetch_ohlcv.py`, `tests/test_ohlcv_daily.py`
-  — exercise `driftwatch/`, not `teamfish/`. They inflate the "101 tests" count with
+  — exercise `driftwatch/`, not `teamfish/`. They inflate the "102 tests" count with
   legacy coverage.
 - `ANTHROPIC_API_KEY` / `claude_model` / `claude_max_tokens` on `teamfish/settings.py`'s
   `Settings` — unused by any teamfish code path. `run_profile.py`'s

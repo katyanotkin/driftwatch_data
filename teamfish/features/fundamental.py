@@ -1,4 +1,8 @@
-"""Fundamental features (fu_ prefix). Point-in-time from ticker.info."""
+"""Fundamental features (fu_ prefix). As-of-fetch-date values from ticker.info.
+
+Not point-in-time: yfinance has no historical fundamentals, so backfills stamp
+the run date's values onto every historical date (see README-pipeline-review.md).
+"""
 from __future__ import annotations
 
 import logging

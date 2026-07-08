@@ -42,8 +42,11 @@ def run(
     Args:
         symbols:      Tickers to compute.
         feature_date: The date features are computed for.
-        raw_bars:     Pre-fetched 252-day history per symbol (symbol → DataFrame).
+        raw_bars:     Pre-fetched history per symbol (symbol → DataFrame). May
+                      extend past feature_date; truncated to index <= feature_date
+                      before any module sees it.
         spy_bars:     SPY history (market proxy for return-based features).
+                      Truncated the same way.
         info_dict:    ticker.info per symbol (symbol → dict).
         sector_map:   GICS sector per symbol (symbol → sector string).
 
