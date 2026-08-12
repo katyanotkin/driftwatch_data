@@ -15,8 +15,6 @@ logging.basicConfig(
 )
 log = logging.getLogger("teamfish.backfill")
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from teamfish.bq_client import BQClient
 from teamfish.features import pipeline as feat_pipeline
 from teamfish.models import FeatureRow, RawBar

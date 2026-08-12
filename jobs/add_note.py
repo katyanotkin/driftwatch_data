@@ -9,7 +9,6 @@ from __future__ import annotations
 import argparse
 import datetime
 import logging
-import os
 import sys
 import uuid
 
@@ -18,8 +17,6 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s %(name)s %(message)s",
 )
 log = logging.getLogger("teamfish.add_note")
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from teamfish.bq_client import BQClient
 from teamfish.models import EventRow

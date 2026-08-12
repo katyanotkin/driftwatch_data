@@ -1,3 +1,32 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "teamfish"
+version = "0.1.0"
+description = "Feature engineering pipeline for individual stocks"
+requires-python = ">=3.12"
+dependencies = [
+    "yfinance",
+    "numpy",
+    "pandas",
+    "google-cloud-bigquery",
+    "pydantic-settings",
+    "pyyaml",
+    "anthropic",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff",
+    "pytest",
+    "pre-commit",
+]
+
+[tool.setuptools.packages.find]
+include = ["teamfish*"]
+
 [tool.ruff]
 line-length = 100
 target-version = "py312"
